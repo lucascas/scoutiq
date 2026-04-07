@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ScoutIQ – Player Intelligence Platform</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: #F1F5F9; color: #0F172A; }
+
+/* Layout */
+.app { display: flex; height: 100vh; overflow: hidden; }
+
+/* Sidebar */
+.sidebar { width: 240px; background: #0F172A; color: #F1F5F9; display: flex; flex-direction: column; flex-shrink: 0; }
+.sidebar-logo { padding: 22px 20px 18px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+.logo-mark { display: flex; align-items: center; gap: 10px; }
+.logo-icon { width: 32px; height: 32px; background: #10B981; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+.logo-text h1 { font-size: 18px; font-weight: 800; color: #F1F5F9; letter-spacing: -0.3px; }
+.logo-text p { font-size: 10px; color: #64748B; margin-top: 1px; text-transform: uppercase; letter-spacing: 0.8px; }
+
+.sidebar-nav { padding: 12px 0; flex: 1; }
+.nav-section { padding: 12px 20px 6px; font-size: 10px; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 1px; }
+.nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 20px; cursor: pointer; color: #94A3B8; font-size: 14px; transition: all 0.15s; position: relative; }
+.nav-item:hover { background: rgba(255,255,255,0.05); color: #F1F5F9; }
+.nav-item.active { background: rgba(16, 185, 129, 0.12); color: #10B981; }
+.nav-item.active::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: #10B981; border-radius: 0 2px 2px 0; }
+.nav-item.disabled { opacity: 0.4; cursor: not-allowed; }
+.nav-icon { font-size: 15px; width: 20px; text-align: center; }
+.nav-badge { margin-left: auto; background: #10B981; color: white; font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 10px; }
+
+.sidebar-footer { padding: 16px 20px; border-top: 1px solid rgba(255,255,255,0.08); }
+.club-row { display: flex; align-items: center; gap: 10px; }
+.club-avatar { width: 34px; height: 34px; background: linear-gradient(135deg, #1D4ED8, #3B82F6); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px; color: white; flex-shrink: 0; }
+.club-details { flex: 1; min-width: 0; }
+.club-name { font-size: 13px; font-weight: 600; color: #F1F5F9; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.club-role { font-size: 11px; color: #64748B; }
+
+/* Main content */
+.main { flex: 1; overflow-y: auto; display: flex; flex-direction: column; }
+
+/* Topbar */
+.topbar { background: white; padding: 16px 28px; border-bottom: 1px solid #E2E8F0; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 10; }
+.topbar-left h2 { font-size: 20px; font-weight: 700; color: #0F172A; }
+.topbar-left p { font-size: 13px; color: #94A3B8; margin-top: 2px; }
+.topbar-right { display: flex; align-items: center; gap: 12px; }
+.search-input { padding: 8px 12px 8px 36px; border: 1px solid #E2E8F0; border-radius: 8px; font-size: 14px; color: #0F172A; background: #F8FAFC; width: 220px; outline: none; }
+.search-input:focus { border-color: #10B981; background: white; }
+.search-wrapper { position: relative; }
+.search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: #94A3B8; font-size: 14px; }
+
+/* Buttons */
+.btn { padding: 8px 16px; border-radius: 8px; border: none; cursor: pointer; font-size: 14px; font-weight: 500; transition: all 0.15s; display: inline-flex; align-items: center; gap: 6px; }
+.btn-primary { background: #10B981; color: white; }
+.btn-primary:hover { background: #059669; }
+.btn-outline { background: white; color: #0F172A; border: 1px solid #E2E8F0; }
+.btn-outline:hover { background: #F8FAFC; border-color: #CBD5E1; }
+.btn-danger { background: #FEE2E2; color: #EF4444; border: none; }
+.btn-danger:hover { background: #FECACA; }
+.btn-sm { padding: 6px 12px; font-size: 13px; }
+
+/* Content area */
+.content { padding: 24px 28px; flex: 1; }
+
+/* Screens */
+.screen { display: none; }
+.screen.active { display: block; }
+
+/* Badges */
+.badge { padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 700; display: inline-block; }
+.badge-high { background: #D1FAE5; color: #065F46; }
+.badge-mid { background: #FEF3C7; color: #92400E; }
+.badge-low { background: #FEE2E2; color: #991B1B; }
+.pos-tag { padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; background: #DBEAFE; color: #1E40AF; display: inline-block; }
+
+/* Stats summary row */
+.stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+.stat-card { background: white; border-radius: 12px; padding: 18px 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.07); }
+.stat-card-label { font-size: 12px; color: #94A3B8; font-weight: 500; margin-bottom: 6px; }
+.stat-card-value { font-size: 28px; font-weight: 800; color: #0F172A; line-height: 1; }
+.stat-card-sub { font-size: 12px; color: #10B981; margin-top: 6px; font-weight: 500; }
+
+/* Table */
+.table-wrap { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.07); }
+.table-header { padding: 16px 20px; border-bottom: 1px solid #F1F5F9; display: flex; align-items: center; justify-content: space-between; }
+.table-header h3 { font-size: 15px; font-weight: 700; }
+table { width: 100%; border-collapse: collapse; }
+thead { background: #F8FAFC; }
+th { padding: 11px 16px; text-align: left; font-size: 11px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.6px; }
+td { padding: 14px 16px; font-size: 14px; border-top: 1px solid #F8FAFC; vertical-align: middle; }
+tbody tr { cursor: pointer; transition: background 0.1s; }
+tbody tr:hover td { background: #F8FAFC; }
+.player-cell { display: flex; align-items: center; gap: 12px; }
+.player-avatar-sm { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; color: white; flex-shrink: 0; }
+.player-name { font-weight: 600; font-size: 14px; color: #0F172A; }
+.player-club { font-size: 12px; color: #94A3B8; margin-top: 1px; }
+.fit-bar-wrap { display: flex; align-items: center; gap: 8px; }
+.fit-bar-bg { width: 80px; height: 6px; background: #F1F5F9; border-radius: 3px; }
+.fit-bar { height: 100%; border-radius: 3px; }
+.fit-num { font-size: 13px; font-weight: 700; }
+
+/* Filters */
+.filters-bar { background: white; border-radius: 12px; padding: 18px 20px; margin-bottom: 20px; display: flex; gap: 16px; align-items: flex-end; flex-wrap: wrap; box-shadow: 0 1px 3px rgba(0,0,0,0.07); }
+.fg { display: flex; flex-direction: column; gap: 5px; }
+.fg label { font-size: 11px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.5px; }
+.fg select, .fg input { padding: 8px 12px; border: 1px solid #E2E8F0; border-radius: 8px; font-size: 14px; color: #0F172A; background: white; min-width: 140px; outline: none; }
+.fg select:focus, .fg input:focus { border-color: #10B981; }
+.filter-actions { display: flex; gap: 8px; }
+
+/* Player cards grid */
+.cards-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.player-card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.07); cursor: pointer; transition: all 0.2s; border: 2px solid transparent; }
+.player-card:hover { box-shadow: 0 6px 20px rgba(0,0,0,0.1); transform: translateY(-2px); border-color: #E2E8F0; }
+.card-top { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+.card-avatar { width: 46px; height: 46px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 16px; color: white; flex-shrink: 0; }
+.card-name { font-size: 15px; font-weight: 700; color: #0F172A; }
+.card-meta { font-size: 12px; color: #94A3B8; margin-top: 2px; }
+.card-fit-score { margin-left: auto; text-align: center; }
+.card-fit-num { font-size: 22px; font-weight: 800; line-height: 1; }
+.card-fit-label { font-size: 10px; color: #94A3B8; margin-top: 2px; font-weight: 500; }
+.mini-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 12px; padding-top: 12px; border-top: 1px solid #F1F5F9; }
+.mini-stat { text-align: center; }
+.mini-stat-val { font-size: 16px; font-weight: 700; color: #0F172A; }
+.mini-stat-label { font-size: 10px; color: #94A3B8; margin-top: 2px; }
+
+/* Profile */
+.back-btn { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; color: #64748B; font-size: 14px; margin-bottom: 18px; padding: 6px 0; }
+.back-btn:hover { color: #10B981; }
+
+.profile-hero { background: white; border-radius: 12px; padding: 24px; margin-bottom: 20px; display: flex; align-items: center; gap: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.07); }
+.profile-avatar-lg { width: 72px; height: 72px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 26px; color: white; flex-shrink: 0; }
+.profile-name { font-size: 24px; font-weight: 800; color: #0F172A; line-height: 1; }
+.profile-tags { display: flex; align-items: center; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+.profile-tag { font-size: 12px; color: #64748B; display: flex; align-items: center; gap: 4px; }
+.profile-tag::before { content: '·'; margin-right: 2px; }
+.profile-tag:first-child::before { display: none; }
+.profile-cta { margin-left: auto; display: flex; gap: 10px; flex-shrink: 0; }
+
+.profile-layout { display: grid; grid-template-columns: 1fr 1fr 300px; gap: 20px; }
+.pcard { background: white; border-radius: 12px; padding: 22px; box-shadow: 0 1px 3px rgba(0,0,0,0.07); }
+.pcard h3 { font-size: 13px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 16px; }
+
+/* Radar chart */
+.radar-wrap { position: relative; height: 260px; display: flex; align-items: center; justify-content: center; }
+
+/* Stats list */
+.srow { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid #F8FAFC; }
+.srow:last-child { border-bottom: none; }
+.srow-label { font-size: 13px; color: #64748B; width: 130px; flex-shrink: 0; }
+.srow-bar-wrap { flex: 1; height: 5px; background: #F1F5F9; border-radius: 3px; }
+.srow-bar { height: 100%; border-radius: 3px; background: #10B981; }
+.srow-val { font-size: 13px; font-weight: 700; color: #0F172A; width: 44px; text-align: right; flex-shrink: 0; }
+
+/* Fit score */
+.fit-circle { width: 110px; height: 110px; border-radius: 50%; margin: 0 auto 16px; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 6px solid; }
+.fit-big { font-size: 32px; font-weight: 800; line-height: 1; }
+.fit-lbl { font-size: 11px; color: #94A3B8; margin-top: 2px; }
+.fit-dim { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; font-size: 13px; border-bottom: 1px solid #F8FAFC; }
+.fit-dim:last-child { border-bottom: none; }
+.fit-dim-label { color: #64748B; }
+.fit-dim-pct { font-weight: 700; color: #0F172A; }
+.fit-dim-bar { width: 60px; height: 4px; background: #F1F5F9; border-radius: 2px; }
+.fit-dim-fill { height: 100%; border-radius: 2px; }
+
+/* Match history */
+.match-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid #F8FAFC; font-size: 13px; }
+.match-row:last-child { border-bottom: none; }
+.result-chip { width: 22px; height: 22px; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 11px; color: white; flex-shrink: 0; }
+.r-W { background: #10B981; }
+.r-D { background: #F59E0B; }
+.r-L { background: #EF4444; }
+.match-opp { flex: 1; color: #0F172A; font-weight: 500; }
+.match-rating { font-weight: 700; margin-right: 4px; }
+.match-stats { color: #94A3B8; font-size: 12px; }
+
+/* Empty state */
+.empty-state { text-align: center; padding: 60px; color: #94A3B8; }
+.empty-state p { font-size: 16px; margin-bottom: 8px; font-weight: 500; }
+.empty-state span { font-size: 13px; }
+
+/* Alert/insight bar */
+.insight-bar { background: linear-gradient(135deg, #ECFDF5, #D1FAE5); border: 1px solid #A7F3D0; border-radius: 10px; padding: 14px 18px; margin-bottom: 20px; display: flex; align-items: center; gap: 12px; }
+.insight-icon { font-size: 20px; flex-shrink: 0; }
+.insight-text { font-size: 14px; color: #065F46; font-weight: 500; }
+.insight-text strong { font-weight: 700; }
+
+/* Section label */
+.section-label { font-size: 13px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 14px; margin-top: 4px; }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-mark">
+        <div class="logo-icon">⚽</div>
+        <div class="logo-text">
+          <h1>ScoutIQ</h1>
+          <p>Player Intelligence</p>
+        </div>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section">Scouting</div>
+      <div class="nav-item active" onclick="showScreen('shortlist')" id="nav-shortlist">
+        <span class="nav-icon">⭐</span> Mi Shortlist
+        <span class="nav-badge" id="shortlist-count">5</span>
+      </div>
+      <div class="nav-item" onclick="showScreen('search')" id="nav-search">
+        <span class="nav-icon">🔍</span> Buscar Jugadores
+      </div>
+      <div class="nav-section" style="margin-top:8px;">Club</div>
+      <div class="nav-item disabled">
+        <span class="nav-icon">📊</span> Mi Equipo
+      </div>
+      <div class="nav-item disabled">
+        <span class="nav-icon">📋</span> Informes
+      </div>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="club-row">
+        <div class="club-avatar">V</div>
+        <div class="club-details">
+          <div class="club-name">FC Valdemar</div>
+          <div class="club-role">Director Deportivo</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+
+    <!-- ===================== SCREEN: SHORTLIST ===================== -->
+    <div class="screen active" id="screen-shortlist">
+      <div class="topbar">
+        <div class="topbar-left">
+          <h2>Mi Shortlist</h2>
+          <p>Seguimiento activo de candidatos a fichaje</p>
+        </div>
+        <div class="topbar-right">
+          <button class="btn btn-primary" onclick="showScreen('search')">+ Agregar jugadores</button>
+        </div>
+      </div>
+
+      <div class="content">
+        <!-- Summary -->
+        <div class="stats-row">
+          <div class="stat-card">
+            <div class="stat-card-label">Jugadores en seguimiento</div>
+            <div class="stat-card-value" id="sl-total">5</div>
+            <div class="stat-card-sub">↑ 2 esta semana</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-label">Fit score promedio</div>
+            <div class="stat-card-value">81</div>
+            <div class="stat-card-sub">Alta coincidencia táctica</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-label">Contratos vencen en 2025</div>
+            <div class="stat-card-value">3</div>
+            <div class="stat-card-sub">⚡ Oportunidad de mercado</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-label">Valor de mercado total</div>
+            <div class="stat-card-value">€52M</div>
+            <div class="stat-card-sub">Rango estimado</div>
+          </div>
+        </div>
+
+        <!-- Insight -->
+        <div class="insight-bar">
+          <div class="insight-icon">💡</div>
+          <div class="insight-text"><strong>Recomendación:</strong> Sergi Darder (91/100) tiene contrato hasta Jun 2025 y encaja perfectamente con tu esquema de alta presión. Ventana de negociación óptima: ahora.</div>
+        </div>
+
+        <!-- Table -->
+        <div class="table-wrap">
+          <div class="table-header">
+            <h3>Candidatos activos</h3>
+            <span style="font-size:13px;color:#94A3B8;">Ordenados por Fit Score ↓</span>
+          </div>
+          <table id="shortlist-table">
+            <thead>
+              <tr>
+                <th>Jugador</th>
+                <th>Posición</th>
+                <th>Liga</th>
+                <th>Edad</th>
+                <th>Valor</th>
+                <th>Contrato</th>
+                <th>Fit Score</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="shortlist-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================== SCREEN: SEARCH ===================== -->
+    <div class="screen" id="screen-search">
+      <div class="topbar">
+        <div class="topbar-left">
+          <h2>Buscar Jugadores</h2>
+          <p>Base de datos de 8,400+ jugadores en ligas europeas</p>
+        </div>
+      </div>
+
+      <div class="content">
+        <!-- Filters -->
+        <div class="filters-bar">
+          <div class="fg">
+            <label>Posición</label>
+            <select id="f-position">
+              <option value="">Todas</option>
+              <option value="MC">MC – Mediocampista</option>
+              <option value="AMC">AMC – Mediap. Ofensivo</option>
+              <option value="EI">EI – Extremo Izq.</option>
+              <option value="EXD">EXD – Extremo Der.</option>
+            </select>
+          </div>
+          <div class="fg">
+            <label>Liga</label>
+            <select id="f-league">
+              <option value="">Todas</option>
+              <option value="Ligue 1">Ligue 1</option>
+              <option value="La Liga">La Liga</option>
+              <option value="Serie A">Serie A</option>
+              <option value="Serie B">Serie B</option>
+            </select>
+          </div>
+          <div class="fg">
+            <label>Edad máx.</label>
+            <input type="number" id="f-age" placeholder="Ej: 28" min="16" max="40" style="width:100px;" />
+          </div>
+          <div class="fg">
+            <label>Fit Score mín.</label>
+            <input type="number" id="f-fit" placeholder="Ej: 70" min="0" max="100" style="width:110px;" />
+          </div>
+          <div class="filter-actions">
+            <button class="btn btn-primary" onclick="applyFilters()">Buscar</button>
+            <button class="btn btn-outline" onclick="clearFilters()">Limpiar</button>
+          </div>
+        </div>
+
+        <div class="section-label" id="search-results-label">6 jugadores encontrados</div>
+        <div class="cards-grid" id="cards-container"></div>
+      </div>
+    </div>
+
+    <!-- ===================== SCREEN: PROFILE ===================== -->
+    <div class="screen" id="screen-profile">
+      <div class="topbar" id="profile-topbar">
+        <div class="topbar-left">
+          <h2 id="profile-topbar-name">Perfil de Jugador</h2>
+          <p id="profile-topbar-sub">Análisis detallado</p>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="back-btn" id="back-btn" onclick="goBack()">← Volver</div>
+
+        <!-- Hero -->
+        <div class="profile-hero">
+          <div class="profile-avatar-lg" id="p-avatar"></div>
+          <div>
+            <div class="profile-name" id="p-name"></div>
+            <div class="profile-tags">
+              <span class="profile-tag" id="p-pos-tag"></span>
+              <span class="profile-tag" id="p-club"></span>
+              <span class="profile-tag" id="p-league"></span>
+              <span class="profile-tag" id="p-age"></span>
+              <span class="profile-tag" id="p-nationality"></span>
+              <span class="profile-tag" id="p-value"></span>
+              <span class="profile-tag" id="p-contract"></span>
+            </div>
+          </div>
+          <div class="profile-cta" id="p-actions"></div>
+        </div>
+
+        <!-- 3-col layout -->
+        <div class="profile-layout">
+
+          <!-- Col 1: Radar -->
+          <div class="pcard">
+            <h3>Perfil de Rendimiento</h3>
+            <div class="radar-wrap">
+              <canvas id="radarChart"></canvas>
+            </div>
+          </div>
+
+          <!-- Col 2: Stats -->
+          <div>
+            <div class="pcard" style="margin-bottom:16px;">
+              <h3>Estadísticas Clave (Temporada)</h3>
+              <div id="p-stats-list"></div>
+            </div>
+            <div class="pcard">
+              <h3>Últimos 5 Partidos</h3>
+              <div id="p-matches"></div>
+            </div>
+          </div>
+
+          <!-- Col 3: Fit -->
+          <div class="pcard">
+            <h3>Encaje Táctico – FC Valdemar</h3>
+            <div style="text-align:center;padding:12px 0 16px;">
+              <div class="fit-circle" id="p-fit-circle">
+                <div class="fit-big" id="p-fit-num"></div>
+                <div class="fit-lbl">Fit Score</div>
+              </div>
+              <div id="p-fit-badge"></div>
+            </div>
+            <div id="p-fit-dims"></div>
+            <div style="margin-top:16px;padding:12px;background:#F8FAFC;border-radius:8px;font-size:12px;color:#64748B;line-height:1.5;" id="p-fit-summary"></div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /main -->
+</div><!-- /app -->
+
+<script>
+// ===================== DATA =====================
+const players = [
+  {
+    id: 1, name: "Sergi Darder", initials: "SD", color: "#6366F1",
+    position: "MC", club: "RCD Espanyol", league: "La Liga",
+    nationality: "🇪🇸 España", age: 30, marketValue: "€8M", contractEnd: "Jun 2025",
+    fitScore: 91,
+    stats: { goals: 9, assists: 7, passAcc: 91, pressures: 18.4, dribbles: 2.9, keyPasses: 3.8 },
+    radar: [93, 72, 88, 65, 70, 85],
+    details: { goalsP90: 0.42, assistsP90: 0.33, xG: 7.8, xA: 6.2, progressive: 8.1, shotCreating: 4.2 },
+    matches: [
+      { opp: "Barcelona", result: "L", rating: 7.3, goals: 1, assists: 0 },
+      { opp: "Villarreal", result: "W", rating: 8.5, goals: 2, assists: 1 },
+      { opp: "Sevilla", result: "D", rating: 7.1, goals: 0, assists: 1 },
+      { opp: "Getafe", result: "W", rating: 8.0, goals: 1, assists: 0 },
+      { opp: "Cádiz", result: "W", rating: 7.6, goals: 1, assists: 2 }
+    ],
+    fitDetails: [
+      { label: "Alta presión", match: 95 },
+      { label: "Juego combinativo", match: 91 },
+      { label: "Perfil ofensivo", match: 82 },
+      { label: "Adaptación táctica", match: 94 }
+    ],
+    fitSummary: "Darder es el match más alto de tu shortlist. Su tasa de presiones y precisión de pase (91%) encajan directamente con el sistema 4-3-3 de alta intensidad de Valdemar. Contrato corto = ventaja negociadora.",
+    inShortlist: true
+  },
+  {
+    id: 2, name: "Amine Harit", initials: "AH", color: "#EC4899",
+    position: "AMC", club: "Olympique Marseille", league: "Ligue 1",
+    nationality: "🇲🇦 Marruecos", age: 26, marketValue: "€14M", contractEnd: "Jun 2025",
+    fitScore: 87,
+    stats: { goals: 8, assists: 11, passAcc: 88, pressures: 14.2, dribbles: 4.1, keyPasses: 3.2 },
+    radar: [88, 82, 75, 70, 85, 90],
+    details: { goalsP90: 0.41, assistsP90: 0.56, xG: 7.2, xA: 9.8, progressive: 6.8, shotCreating: 4.9 },
+    matches: [
+      { opp: "PSG", result: "L", rating: 7.1, goals: 1, assists: 0 },
+      { opp: "Lyon", result: "W", rating: 8.2, goals: 0, assists: 2 },
+      { opp: "Nice", result: "D", rating: 6.8, goals: 1, assists: 1 },
+      { opp: "Rennes", result: "W", rating: 7.5, goals: 0, assists: 1 },
+      { opp: "Brest", result: "W", rating: 7.8, goals: 2, assists: 0 }
+    ],
+    fitDetails: [
+      { label: "Alta presión", match: 88 },
+      { label: "Juego combinativo", match: 85 },
+      { label: "Perfil ofensivo", match: 92 },
+      { label: "Adaptación táctica", match: 82 }
+    ],
+    fitSummary: "Harit aporta creatividad y asistencias al nivel de élite de Ligue 1. Su contrato vence en 2025 y el Marsella puede necesitar liquidez. Riesgo: menor intensidad defensiva que el perfil ideal de Valdemar.",
+    inShortlist: true
+  },
+  {
+    id: 3, name: "Tanner Tessmann", initials: "TT", color: "#10B981",
+    position: "MC", club: "Venezia FC", league: "Serie B",
+    nationality: "🇺🇸 EE.UU.", age: 22, marketValue: "€6M", contractEnd: "Jun 2026",
+    fitScore: 83,
+    stats: { goals: 4, assists: 6, passAcc: 87, pressures: 21.3, dribbles: 2.1, keyPasses: 2.2 },
+    radar: [85, 65, 92, 78, 72, 68],
+    details: { goalsP90: 0.18, assistsP90: 0.27, xG: 3.1, xA: 5.4, progressive: 7.2, shotCreating: 2.8 },
+    matches: [
+      { opp: "Parma", result: "W", rating: 7.8, goals: 0, assists: 1 },
+      { opp: "Palermo", result: "W", rating: 8.1, goals: 1, assists: 1 },
+      { opp: "Catanzaro", result: "D", rating: 7.0, goals: 0, assists: 0 },
+      { opp: "Pisa", result: "L", rating: 6.5, goals: 0, assists: 0 },
+      { opp: "Como", result: "W", rating: 7.9, goals: 1, assists: 1 }
+    ],
+    fitDetails: [
+      { label: "Alta presión", match: 96 },
+      { label: "Juego combinativo", match: 84 },
+      { label: "Perfil ofensivo", match: 65 },
+      { label: "Adaptación táctica", match: 88 }
+    ],
+    fitSummary: "Apuesta a futuro. El mejor pressing de tu shortlist (21.3 presiones/90') con solo 22 años. Precio accesible y margen de crecimiento enorme. Riesgo: viene de Serie B — transición a primer nivel.",
+    inShortlist: true
+  },
+  {
+    id: 4, name: "Alexis Saelemaekers", initials: "AS", color: "#F59E0B",
+    position: "EXD", club: "Bologna FC", league: "Serie A",
+    nationality: "🇧🇪 Bélgica", age: 24, marketValue: "€16M", contractEnd: "Jun 2026",
+    fitScore: 79,
+    stats: { goals: 5, assists: 9, passAcc: 83, pressures: 16.1, dribbles: 3.8, keyPasses: 2.5 },
+    radar: [80, 85, 82, 60, 90, 72],
+    details: { goalsP90: 0.24, assistsP90: 0.44, xG: 4.2, xA: 8.1, progressive: 5.9, shotCreating: 3.5 },
+    matches: [
+      { opp: "Inter", result: "L", rating: 6.8, goals: 0, assists: 1 },
+      { opp: "Fiorentina", result: "W", rating: 7.9, goals: 1, assists: 1 },
+      { opp: "Lazio", result: "D", rating: 7.2, goals: 0, assists: 1 },
+      { opp: "Torino", result: "W", rating: 7.5, goals: 1, assists: 0 },
+      { opp: "Sassuolo", result: "W", rating: 8.1, goals: 1, assists: 2 }
+    ],
+    fitDetails: [
+      { label: "Alta presión", match: 82 },
+      { label: "Juego combinativo", match: 78 },
+      { label: "Perfil ofensivo", match: 72 },
+      { label: "Adaptación táctica", match: 85 }
+    ],
+    fitSummary: "Saelemaekers tiene velocidad excepcional (90 pace) y buena calidad de asistencia. Su valor de mercado (€16M) está por encima del presupuesto objetivo, pero podría negociarse dado el año de contrato restante.",
+    inShortlist: false
+  },
+  {
+    id: 5, name: "Romain Faivre", initials: "RF", color: "#8B5CF6",
+    position: "EI", club: "Stade Brestois", league: "Ligue 1",
+    nationality: "🇫🇷 Francia", age: 25, marketValue: "€10M", contractEnd: "Jun 2026",
+    fitScore: 74,
+    stats: { goals: 6, assists: 8, passAcc: 84, pressures: 11.8, dribbles: 5.3, keyPasses: 2.8 },
+    radar: [82, 90, 68, 55, 88, 78],
+    details: { goalsP90: 0.31, assistsP90: 0.41, xG: 5.1, xA: 7.3, progressive: 4.2, shotCreating: 3.8 },
+    matches: [
+      { opp: "Monaco", result: "D", rating: 6.9, goals: 0, assists: 1 },
+      { opp: "Lille", result: "W", rating: 7.8, goals: 1, assists: 0 },
+      { opp: "Lens", result: "W", rating: 7.2, goals: 1, assists: 1 },
+      { opp: "Toulouse", result: "L", rating: 6.1, goals: 0, assists: 0 },
+      { opp: "Lorient", result: "W", rating: 8.0, goals: 2, assists: 0 }
+    ],
+    fitDetails: [
+      { label: "Alta presión", match: 68 },
+      { label: "Juego combinativo", match: 74 },
+      { label: "Perfil ofensivo", match: 88 },
+      { label: "Adaptación táctica", match: 70 }
+    ],
+    fitSummary: "Gran habilidad individual (5.3 regates/90') pero encaje moderado con el sistema colectivo de Valdemar. Su baja tasa de presiones es la principal bandera roja táctica.",
+    inShortlist: true
+  },
+  {
+    id: 6, name: "Yusuf Yazici", initials: "YY", color: "#EF4444",
+    position: "AMC", club: "LOSC Lille", league: "Ligue 1",
+    nationality: "🇹🇷 Turquía", age: 26, marketValue: "€12M", contractEnd: "Jun 2025",
+    fitScore: 65,
+    stats: { goals: 7, assists: 5, passAcc: 81, pressures: 10.2, dribbles: 3.5, keyPasses: 2.9 },
+    radar: [79, 78, 62, 68, 75, 80],
+    details: { goalsP90: 0.35, assistsP90: 0.25, xG: 6.1, xA: 4.8, progressive: 4.5, shotCreating: 3.2 },
+    matches: [
+      { opp: "PSG", result: "L", rating: 6.2, goals: 0, assists: 0 },
+      { opp: "Rennes", result: "D", rating: 7.0, goals: 1, assists: 0 },
+      { opp: "Lens", result: "W", rating: 7.8, goals: 2, assists: 0 },
+      { opp: "Nice", result: "L", rating: 6.4, goals: 0, assists: 1 },
+      { opp: "Strasbourg", result: "W", rating: 7.3, goals: 1, assists: 1 }
+    ],
+    fitDetails: [
+      { label: "Alta presión", match: 58 },
+      { label: "Juego combinativo", match: 65 },
+      { label: "Perfil ofensivo", match: 78 },
+      { label: "Adaptación táctica", match: 60 }
+    ],
+    fitSummary: "Yazici tiene gol pero bajo encaje táctico con el modelo de presión de Valdemar. Incluido como referencia de mercado, no como candidato prioritario.",
+    inShortlist: true
+  }
+];
+
+// ===================== STATE =====================
+let currentScreen = 'shortlist';
+let previousScreen = 'shortlist';
+let currentPlayerId = null;
+let radarChart = null;
+let filteredPlayers = [...players];
+
+// ===================== NAVIGATION =====================
+function showScreen(name, playerId = null) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('screen-' + name).classList.add('active');
+  if (name !== 'profile') {
+    const navEl = document.getElementById('nav-' + name);
+    if (navEl) navEl.classList.add('active');
+    previousScreen = name;
+  }
+  currentScreen = name;
+  if (name === 'shortlist') renderShortlist();
+  if (name === 'search') renderCards(filteredPlayers);
+  if (name === 'profile' && playerId !== null) {
+    currentPlayerId = playerId;
+    renderProfile(playerId);
+  }
+}
+
+function goBack() {
+  showScreen(previousScreen);
+}
+
+function openPlayer(id) {
+  showScreen('profile', id);
+}
+
+// ===================== HELPERS =====================
+function fitColor(score) {
+  if (score >= 80) return '#10B981';
+  if (score >= 65) return '#F59E0B';
+  return '#EF4444';
+}
+function fitBadgeClass(score) {
+  if (score >= 80) return 'badge-high';
+  if (score >= 65) return 'badge-mid';
+  return 'badge-low';
+}
+function fitLabel(score) {
+  if (score >= 80) return 'Alta compatibilidad';
+  if (score >= 65) return 'Compatibilidad media';
+  return 'Baja compatibilidad';
+}
+function updateShortlistCount() {
+  const count = players.filter(p => p.inShortlist).length;
+  document.getElementById('shortlist-count').textContent = count;
+  document.getElementById('sl-total').textContent = count;
+}
+
+// ===================== SHORTLIST =====================
+function renderShortlist() {
+  const tbody = document.getElementById('shortlist-tbody');
+  const sl = players.filter(p => p.inShortlist).sort((a,b) => b.fitScore - a.fitScore);
+  tbody.innerHTML = sl.map(p => `
+    <tr onclick="openPlayer(${p.id})">
+      <td>
+        <div class="player-cell">
+          <div class="player-avatar-sm" style="background:${p.color}">${p.initials}</div>
+          <div>
+            <div class="player-name">${p.name}</div>
+            <div class="player-club">${p.club}</div>
+          </div>
+        </div>
+      </td>
+      <td><span class="pos-tag">${p.position}</span></td>
+      <td style="color:#64748B;font-size:13px;">${p.league}</td>
+      <td style="font-size:13px;">${p.age} años</td>
+      <td style="font-weight:600;">${p.marketValue}</td>
+      <td style="font-size:13px;color:${p.contractEnd.includes('2025') ? '#EF4444' : '#64748B'};">${p.contractEnd}</td>
+      <td>
+        <div class="fit-bar-wrap">
+          <div class="fit-bar-bg">
+            <div class="fit-bar" style="width:${p.fitScore}%;background:${fitColor(p.fitScore)};"></div>
+          </div>
+          <span class="fit-num" style="color:${fitColor(p.fitScore)};">${p.fitScore}</span>
+        </div>
+      </td>
+      <td><button class="btn btn-outline btn-sm" onclick="event.stopPropagation();openPlayer(${p.id})">Ver perfil →</button></td>
+    </tr>
+  `).join('');
+}
+
+// ===================== SEARCH =====================
+function renderCards(list) {
+  const container = document.getElementById('cards-container');
+  document.getElementById('search-results-label').textContent = `${list.length} jugadores encontrados`;
+  if (list.length === 0) {
+    container.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><p>No se encontraron jugadores</p><span>Ajustá los filtros de búsqueda</span></div>`;
+    return;
+  }
+  container.innerHTML = list.map(p => `
+    <div class="player-card" onclick="openPlayer(${p.id})">
+      <div class="card-top">
+        <div class="card-avatar" style="background:${p.color}">${p.initials}</div>
+        <div style="flex:1;">
+          <div class="card-name">${p.name}</div>
+          <div class="card-meta">${p.club} · <span class="pos-tag" style="font-size:10px;">${p.position}</span></div>
+        </div>
+        <div class="card-fit-score">
+          <div class="card-fit-num" style="color:${fitColor(p.fitScore)};">${p.fitScore}</div>
+          <div class="card-fit-label">Fit Score</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:4px;">
+        <span style="font-size:12px;color:#64748B;">${p.nationality}</span>
+        <span style="font-size:12px;color:#64748B;">· ${p.age} años</span>
+        <span style="font-size:12px;color:#64748B;">· ${p.marketValue}</span>
+        <span style="font-size:12px;color:${p.contractEnd.includes('2025')?'#EF4444':'#64748B'};">· Contrato: ${p.contractEnd}</span>
+      </div>
+      <div class="mini-stats">
+        <div class="mini-stat">
+          <div class="mini-stat-val">${p.stats.goals}</div>
+          <div class="mini-stat-label">Goles</div>
+        </div>
+        <div class="mini-stat">
+          <div class="mini-stat-val">${p.stats.assists}</div>
+          <div class="mini-stat-label">Asist.</div>
+        </div>
+        <div class="mini-stat">
+          <div class="mini-stat-val">${p.stats.passAcc}%</div>
+          <div class="mini-stat-label">Pases %</div>
+        </div>
+      </div>
+      <div style="margin-top:12px;padding-top:12px;border-top:1px solid #F1F5F9;display:flex;align-items:center;justify-content:space-between;">
+        <span class="badge ${fitBadgeClass(p.fitScore)}">${fitLabel(p.fitScore)}</span>
+        ${p.inShortlist
+          ? `<button class="btn btn-danger btn-sm" onclick="event.stopPropagation();toggleShortlist(${p.id})">Quitar</button>`
+          : `<button class="btn btn-primary btn-sm" onclick="event.stopPropagation();toggleShortlist(${p.id})">+ Shortlist</button>`
+        }
+      </div>
+    </div>
+  `).join('');
+}
+
+function applyFilters() {
+  const pos = document.getElementById('f-position').value;
+  const league = document.getElementById('f-league').value;
+  const age = parseInt(document.getElementById('f-age').value) || 99;
+  const fit = parseInt(document.getElementById('f-fit').value) || 0;
+  filteredPlayers = players.filter(p =>
+    (!pos || p.position === pos) &&
+    (!league || p.league === league) &&
+    (p.age <= age) &&
+    (p.fitScore >= fit)
+  );
+  renderCards(filteredPlayers);
+}
+
+function clearFilters() {
+  document.getElementById('f-position').value = '';
+  document.getElementById('f-league').value = '';
+  document.getElementById('f-age').value = '';
+  document.getElementById('f-fit').value = '';
+  filteredPlayers = [...players];
+  renderCards(filteredPlayers);
+}
+
+// ===================== PROFILE =====================
+function renderProfile(id) {
+  const p = players.find(x => x.id === id);
+  if (!p) return;
+
+  document.getElementById('profile-topbar-name').textContent = p.name;
+  document.getElementById('profile-topbar-sub').textContent = `${p.position} · ${p.club} · ${p.league}`;
+
+  // Avatar
+  const av = document.getElementById('p-avatar');
+  av.textContent = p.initials;
+  av.style.background = p.color;
+
+  // Info
+  document.getElementById('p-name').textContent = p.name;
+  document.getElementById('p-pos-tag').innerHTML = `<span class="pos-tag">${p.position}</span>`;
+  document.getElementById('p-club').textContent = p.club;
+  document.getElementById('p-league').textContent = p.league;
+  document.getElementById('p-age').textContent = `${p.age} años`;
+  document.getElementById('p-nationality').textContent = p.nationality;
+  document.getElementById('p-value').textContent = `VM: ${p.marketValue}`;
+  document.getElementById('p-contract').innerHTML = `Contrato: <strong style="color:${p.contractEnd.includes('2025')?'#EF4444':'#0F172A'}">${p.contractEnd}</strong>`;
+
+  // Actions
+  const actEl = document.getElementById('p-actions');
+  actEl.innerHTML = p.inShortlist
+    ? `<button class="btn btn-danger" onclick="toggleShortlist(${p.id})">✕ Quitar de shortlist</button>`
+    : `<button class="btn btn-primary" onclick="toggleShortlist(${p.id})">+ Agregar a shortlist</button>`;
+
+  // Stats list
+  const statsData = [
+    { label: 'Goles', val: p.stats.goals, max: 20, display: p.stats.goals },
+    { label: 'Asistencias', val: p.stats.assists, max: 15, display: p.stats.assists },
+    { label: 'Precisión pase', val: p.stats.passAcc, max: 100, display: p.stats.passAcc + '%' },
+    { label: 'Presiones/90', val: p.stats.pressures, max: 30, display: p.stats.pressures },
+    { label: 'Regates/90', val: p.stats.dribbles, max: 8, display: p.stats.dribbles },
+    { label: 'Pases clave/90', val: p.stats.keyPasses, max: 6, display: p.stats.keyPasses },
+    { label: 'Goles/90 (xG)', val: p.details.xG, max: 15, display: p.details.xG },
+    { label: 'Asist/90 (xA)', val: p.details.xA, max: 12, display: p.details.xA },
+    { label: 'Acciones progr.', val: p.details.progressive, max: 12, display: p.details.progressive },
+  ];
+  document.getElementById('p-stats-list').innerHTML = statsData.map(s => `
+    <div class="srow">
+      <div class="srow-label">${s.label}</div>
+      <div class="srow-bar-wrap"><div class="srow-bar" style="width:${Math.min(100, (s.val/s.max)*100)}%;"></div></div>
+      <div class="srow-val">${s.display}</div>
+    </div>
+  `).join('');
+
+  // Matches
+  document.getElementById('p-matches').innerHTML = p.matches.map(m => `
+    <div class="match-row">
+      <div class="result-chip r-${m.result}">${m.result}</div>
+      <div class="match-opp">vs. ${m.opp}</div>
+      <span class="match-rating" style="color:${m.rating>=7.5?'#10B981':m.rating>=6.5?'#F59E0B':'#EF4444'};">${m.rating}</span>
+      <span class="match-stats">${m.goals}G ${m.assists}A</span>
+    </div>
+  `).join('');
+
+  // Fit score
+  const fc = document.getElementById('p-fit-circle');
+  const color = fitColor(p.fitScore);
+  fc.style.borderColor = color;
+  document.getElementById('p-fit-num').textContent = p.fitScore;
+  document.getElementById('p-fit-num').style.color = color;
+  document.getElementById('p-fit-badge').innerHTML = `<span class="badge ${fitBadgeClass(p.fitScore)}">${fitLabel(p.fitScore)}</span>`;
+
+  document.getElementById('p-fit-dims').innerHTML = p.fitDetails.map(d => `
+    <div class="fit-dim">
+      <div class="fit-dim-label">${d.label}</div>
+      <div class="fit-dim-bar"><div class="fit-dim-fill" style="width:${d.match}%;background:${fitColor(d.match)};"></div></div>
+      <div class="fit-dim-pct" style="color:${fitColor(d.match)};">${d.match}%</div>
+    </div>
+  `).join('');
+
+  document.getElementById('p-fit-summary').innerHTML = `💬 <em>${p.fitSummary}</em>`;
+
+  // Radar chart
+  if (radarChart) { radarChart.destroy(); radarChart = null; }
+  const ctx = document.getElementById('radarChart').getContext('2d');
+  radarChart = new Chart(ctx, {
+    type: 'radar',
+    data: {
+      labels: ['Pase', 'Dribling', 'Presión', 'Aéreo', 'Velocidad', 'Creatividad'],
+      datasets: [{
+        label: p.name,
+        data: p.radar,
+        backgroundColor: p.color + '30',
+        borderColor: p.color,
+        borderWidth: 2.5,
+        pointBackgroundColor: p.color,
+        pointBorderColor: '#fff',
+        pointBorderWidth: 2,
+        pointRadius: 4,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        r: {
+          min: 0, max: 100,
+          ticks: { stepSize: 25, display: false },
+          grid: { color: '#E2E8F0' },
+          angleLines: { color: '#E2E8F0' },
+          pointLabels: { font: { size: 12, weight: '600' }, color: '#64748B' }
+        }
+      },
+      plugins: { legend: { display: false } }
+    }
+  });
+}
+
+// ===================== SHORTLIST TOGGLE =====================
+function toggleShortlist(id) {
+  const p = players.find(x => x.id === id);
+  if (!p) return;
+  p.inShortlist = !p.inShortlist;
+  updateShortlistCount();
+
+  if (currentScreen === 'shortlist') renderShortlist();
+  if (currentScreen === 'search') renderCards(filteredPlayers);
+  if (currentScreen === 'profile' && currentPlayerId === id) renderProfile(id);
+}
+
+// ===================== INIT =====================
+renderShortlist();
+renderCards(filteredPlayers);
+</script>
+</body>
+</html>
