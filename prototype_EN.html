@@ -1,10 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-M5LXFCWB');</script>
+<!-- End Google Tag Manager -->
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ScoutIQ – Player Intelligence Platform</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://t.contentsquare.net/uxa/41ab4eff053d2.js"></script>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: #F1F5F9; color: #0F172A; }
@@ -277,9 +285,122 @@ tbody tr:hover td { background: #F8FAFC; }
 .google-icon { width: 18px; height: 18px; flex-shrink: 0; }
 
 .login-footer { margin-top: 24px; text-align: center; font-size: 12px; color: #475569; }
+
+/* ===== MOBILE BOTTOM NAV ===== */
+.mobile-nav {
+  display: none;
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
+  background: #0F172A; border-top: 1px solid rgba(255,255,255,0.1);
+  height: 60px; padding: 0 8px;
+  justify-content: space-around; align-items: center;
+}
+.mobile-nav-item {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 3px; padding: 6px 16px; border-radius: 10px; cursor: pointer;
+  color: #64748B; font-size: 10px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.4px; transition: color 0.15s, background 0.15s; flex: 1;
+}
+.mobile-nav-item.active { color: #10B981; background: rgba(16,185,129,0.10); }
+.mobile-nav-icon { font-size: 20px; line-height: 1; }
+
+/* ===== RESPONSIVE: TABLET (iPad ≤ 1024px) ===== */
+@media (max-width: 1024px) {
+  /* Slim icon-only sidebar */
+  .sidebar { width: 64px; }
+  .logo-text,
+  .nav-section,
+  .nav-badge,
+  .club-details { display: none; }
+  .sidebar-logo { padding: 16px 0; justify-content: center; }
+  .logo-mark { justify-content: center; }
+  .sidebar-footer { padding: 12px 0; justify-content: center; }
+  .club-row { justify-content: center; }
+  .club-avatar { margin: 0 auto; }
+  .nav-item { padding: 14px 0; justify-content: center; gap: 0; }
+  .nav-item.active::before { display: none; }
+  .nav-icon { width: auto; font-size: 20px; }
+
+  /* Content adjustments */
+  .content { padding: 20px; }
+  .topbar { padding: 14px 20px; }
+  .search-input { width: 180px; }
+
+  /* Grids */
+  .stats-row { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .cards-grid { grid-template-columns: repeat(2, 1fr); }
+
+  /* Profile */
+  .profile-layout { grid-template-columns: 1fr 1fr; }
+  .profile-layout > div:last-child { grid-column: 1 / -1; }
+
+  /* Login */
+  .login-box { width: 380px; }
+}
+
+/* ===== RESPONSIVE: MOBILE (iPhone ≤ 767px) ===== */
+@media (max-width: 767px) {
+  /* Layout */
+  .app { flex-direction: column; height: auto; min-height: 100vh; overflow: visible; }
+  .sidebar { display: none; }
+  .main { overflow-y: visible; padding-bottom: 60px; }
+  .mobile-nav { display: flex; }
+
+  /* Topbar */
+  .topbar { padding: 12px 16px; flex-wrap: wrap; gap: 10px; }
+  .topbar-left h2 { font-size: 17px; }
+  .topbar-left p { display: none; }
+  .topbar-right { width: 100%; justify-content: space-between; }
+  .search-input { flex: 1; width: auto; min-width: 0; font-size: 14px; }
+
+  /* Content */
+  .content { padding: 14px 14px 24px; }
+
+  /* Stats */
+  .stats-row { grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 16px; }
+  .stat-card { padding: 14px 14px; }
+  .stat-card-value { font-size: 22px; }
+  .stat-card-label { font-size: 11px; }
+
+  /* Insight */
+  .insight-bar { padding: 12px 14px; gap: 10px; }
+  .insight-text { font-size: 13px; }
+
+  /* Table */
+  .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 10px; }
+  table { min-width: 580px; }
+  th, td { padding: 10px 12px; }
+
+  /* Filters */
+  .filters-bar { gap: 10px; padding: 14px; }
+  .fg select, .fg input { min-width: 130px; font-size: 14px; }
+  .filter-actions { width: 100%; }
+  .filter-actions .btn { flex: 1; justify-content: center; }
+
+  /* Cards */
+  .cards-grid { grid-template-columns: 1fr; gap: 12px; }
+  .player-card { padding: 16px; }
+
+  /* Profile hero */
+  .profile-hero { flex-wrap: wrap; gap: 14px; padding: 18px; }
+  .profile-cta { width: 100%; flex-wrap: wrap; }
+  .profile-cta .btn { flex: 1; justify-content: center; font-size: 13px; }
+  .profile-name { font-size: 20px; }
+
+  /* Profile layout: stack all */
+  .profile-layout { grid-template-columns: 1fr; gap: 14px; }
+  .profile-layout > div:last-child { grid-column: auto; }
+
+  /* Login */
+  .login-box { width: calc(100% - 32px); padding: 32px 22px 28px; }
+  .login-headline h2 { font-size: 20px; }
+}
 </style>
 </head>
 <body>
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-M5LXFCWB"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
 <!-- ===================== LOGIN OVERLAY ===================== -->
 <div class="login-overlay" id="login-overlay">
   <div class="login-box">
@@ -568,6 +689,27 @@ tbody tr:hover td { background: #F8FAFC; }
     </div>
 
   </div><!-- /main -->
+
+  <!-- MOBILE BOTTOM NAV -->
+  <nav class="mobile-nav" id="mobile-nav">
+    <div class="mobile-nav-item active" id="mob-nav-shortlist" onclick="showScreen('shortlist')">
+      <span class="mobile-nav-icon">⭐</span>
+      Shortlist
+    </div>
+    <div class="mobile-nav-item" id="mob-nav-search" onclick="showScreen('search')">
+      <span class="mobile-nav-icon">🔍</span>
+      Search
+    </div>
+    <div class="mobile-nav-item" style="opacity:0.35;cursor:not-allowed;">
+      <span class="mobile-nav-icon">📊</span>
+      My Team
+    </div>
+    <div class="mobile-nav-item" style="opacity:0.35;cursor:not-allowed;">
+      <span class="mobile-nav-icon">📋</span>
+      Reports
+    </div>
+  </nav>
+
 </div><!-- /app -->
 
 <script>
@@ -730,10 +872,13 @@ let filteredPlayers = [...players];
 function showScreen(name, playerId = null) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.querySelectorAll('.mobile-nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById('screen-' + name).classList.add('active');
   if (name !== 'profile') {
     const navEl = document.getElementById('nav-' + name);
     if (navEl) navEl.classList.add('active');
+    const mobNavEl = document.getElementById('mob-nav-' + name);
+    if (mobNavEl) mobNavEl.classList.add('active');
     previousScreen = name;
   }
   currentScreen = name;
@@ -743,6 +888,8 @@ function showScreen(name, playerId = null) {
     currentPlayerId = playerId;
     renderProfile(playerId);
   }
+  // Scroll to top on mobile when switching screens
+  window.scrollTo(0, 0);
 }
 
 function goBack() {
