@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ScoutIQ — Development Roadmap</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg:        #0b1622;
+    --bg2:       #111f30;
+    --bg3:       #162233;
+    --teal:      #00c896;
+    --teal-dim:  #00a07a;
+    --teal-glow: rgba(0,200,150,0.12);
+    --amber:     #f5a623;
+    --blue:      #4a9eff;
+    --purple:    #9b6dff;
+    --red:       #ff5f5f;
+    --text:      #e2eaf4;
+    --muted:     #6b8099;
+    --border:    rgba(255,255,255,0.07);
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    padding: 40px 24px 80px;
+  }
+
+  /* ── HEADER ── */
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 1200px;
+    margin: 0 auto 48px;
+  }
+  .logo { display: flex; align-items: center; gap: 10px; }
+  .logo-mark {
+    font-size: 22px; font-weight: 800; color: var(--teal);
+    letter-spacing: -0.5px;
+  }
+  .logo-sub { font-size: 13px; color: var(--muted); font-weight: 400; }
+  .badge {
+    background: var(--teal-glow); border: 1px solid var(--teal-dim);
+    color: var(--teal); font-size: 11px; font-weight: 600;
+    padding: 4px 12px; border-radius: 20px; letter-spacing: 0.5px;
+  }
+
+  /* ── TITLE BLOCK ── */
+  .title-block {
+    max-width: 1200px; margin: 0 auto 52px;
+    border-left: 3px solid var(--teal); padding-left: 20px;
+  }
+  .title-block h1 {
+    font-size: 32px; font-weight: 800; color: #fff;
+    letter-spacing: -0.5px; line-height: 1.2;
+  }
+  .title-block p { margin-top: 8px; color: var(--muted); font-size: 14px; }
+  .title-block .meta { display: flex; gap: 24px; margin-top: 14px; }
+  .meta-item { font-size: 12px; color: var(--muted); }
+  .meta-item strong { color: var(--text); font-weight: 500; }
+
+  /* ── TIMELINE HEADER ── */
+  .timeline-wrap { max-width: 1200px; margin: 0 auto; }
+
+  .time-axis {
+    display: grid;
+    grid-template-columns: 160px repeat(12, 1fr);
+    gap: 0;
+    margin-bottom: 4px;
+  }
+  .time-axis .spacer { }
+  .time-label {
+    text-align: center; font-size: 10px; color: var(--muted);
+    font-weight: 600; letter-spacing: 0.4px; padding: 6px 2px;
+    border-left: 1px solid var(--border);
+  }
+  .time-label.phase-a { color: var(--teal); }
+  .time-label.phase-b { color: var(--amber); }
+  .time-label.phase-c { color: var(--blue); }
+  .time-label.phase-d { color: var(--purple); }
+
+  /* ── PHASE BANDS ── */
+  .phase-band {
+    display: grid;
+    grid-template-columns: 160px repeat(12, 1fr);
+    margin-bottom: 2px;
+  }
+  .phase-band .spacer { }
+  .phase-seg {
+    height: 4px; border-radius: 2px;
+  }
+
+  /* ── LANES ── */
+  .lane { margin-bottom: 6px; }
+
+  .lane-row {
+    display: grid;
+    grid-template-columns: 160px repeat(12, 1fr);
+    align-items: center;
+    min-height: 52px;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .lane-row:hover { background: rgba(255,255,255,0.02); }
+
+  .lane-label {
+    font-size: 11px; font-weight: 600; color: var(--muted);
+    padding: 0 16px 0 4px;
+    text-transform: uppercase; letter-spacing: 0.4px;
+    line-height: 1.3;
+  }
+
+  .lane-grid {
+    display: contents;
+  }
+
+  .cell {
+    border-left: 1px solid var(--border);
+    height: 52px;
+    position: relative;
+  }
+
+  /* ── BARS ── */
+  .bar {
+    position: absolute;
+    top: 50%; transform: translateY(-50%);
+    height: 32px;
+    border-radius: 6px;
+    display: flex; align-items: center;
+    padding: 0 10px;
+    font-size: 11px; font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    z-index: 2;
+    cursor: default;
+    transition: filter 0.15s;
+  }
+  .bar:hover { filter: brightness(1.2); z-index: 10; }
+
+  .bar-teal  { background: linear-gradient(90deg,#00c896,#00a882); color:#003d2d; }
+  .bar-amber { background: linear-gradient(90deg,#f5a623,#e08c10); color:#3d2200; }
+  .bar-blue  { background: linear-gradient(90deg,#4a9eff,#2e7de0); color:#001a40; }
+  .bar-purple{ background: linear-gradient(90deg,#9b6dff,#7a50e0); color:#1a003d; }
+  .bar-red   { background: linear-gradient(90deg,#ff5f5f,#e04444); color:#3d0000; }
+  .bar-teal-outline {
+    background: transparent;
+    border: 1.5px solid var(--teal); color: var(--teal);
+  }
+  .bar-gray  { background: rgba(255,255,255,0.06); color: var(--muted); border: 1px solid var(--border); }
+
+  /* ── MILESTONES ── */
+  .milestone {
+    position: absolute; top: 50%; transform: translate(-50%,-50%);
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    border: 2.5px solid;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 9px; font-weight: 800;
+    z-index: 5; cursor: default;
+    transition: transform 0.15s;
+  }
+  .milestone:hover { transform: translate(-50%,-50%) scale(1.3); }
+  .ms-teal   { background:#003d2d; border-color:var(--teal); color:var(--teal); }
+  .ms-amber  { background:#3d2200; border-color:var(--amber); color:var(--amber); }
+  .ms-blue   { background:#001a40; border-color:var(--blue); color:var(--blue); }
+
+  /* ── SECTION HEADERS ── */
+  .section-header {
+    display: grid;
+    grid-template-columns: 160px repeat(12, 1fr);
+    margin: 20px 0 4px;
+  }
+  .section-title {
+    grid-column: 1 / -1;
+    font-size: 11px; font-weight: 700; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 1px;
+    padding: 8px 4px 4px;
+    border-top: 1px solid var(--border);
+  }
+
+  /* ── DIVIDER LINE ── */
+  .now-line {
+    position: absolute; top: 0; bottom: 0;
+    width: 2px; background: rgba(245,166,35,0.6);
+    z-index: 20;
+  }
+
+  /* ── LEGEND ── */
+  .legend {
+    max-width: 1200px; margin: 40px auto 0;
+    display: flex; flex-wrap: wrap; gap: 20px;
+    padding: 20px; background: var(--bg2);
+    border: 1px solid var(--border); border-radius: 12px;
+  }
+  .legend-title {
+    width: 100%; font-size: 11px; font-weight: 700;
+    color: var(--muted); text-transform: uppercase; letter-spacing: 1px;
+    margin-bottom: 4px;
+  }
+  .legend-item {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 12px; color: var(--text);
+  }
+  .legend-dot {
+    width: 12px; height: 12px; border-radius: 3px; flex-shrink: 0;
+  }
+
+  /* ── METRICS BAR ── */
+  .metrics {
+    max-width: 1200px; margin: 32px auto 0;
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;
+  }
+  .metric-card {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 12px; padding: 20px;
+  }
+  .metric-card .val {
+    font-size: 28px; font-weight: 800; color: var(--teal); line-height: 1;
+  }
+  .metric-card .label {
+    font-size: 12px; color: var(--muted); margin-top: 6px;
+  }
+
+  /* ── TOOLTIP ── */
+  .bar[data-tip]:hover::after {
+    content: attr(data-tip);
+    position: absolute; left: 50%; bottom: calc(100% + 8px);
+    transform: translateX(-50%);
+    background: #1e3248; border: 1px solid var(--border);
+    color: var(--text); font-size: 11px; font-weight: 400;
+    padding: 6px 10px; border-radius: 6px;
+    white-space: normal; max-width: 200px; text-align: center;
+    z-index: 100; line-height: 1.4;
+    pointer-events: none;
+  }
+
+  /* relative container for milestone rows */
+  .cells-container {
+    display: contents;
+  }
+
+  @media (max-width: 900px) {
+    body { padding: 20px 12px 60px; }
+    .metrics { grid-template-columns: repeat(2,1fr); }
+    .time-axis, .lane-row, .phase-band, .section-header {
+      grid-template-columns: 100px repeat(12,1fr);
+    }
+    .bar { font-size: 9px; height: 26px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="logo">
+    <span class="logo-mark">ScoutIQ</span>
+    <span class="logo-sub">Player Intelligence Platform</span>
+  </div>
+  <span class="badge">Development Roadmap v1.0</span>
+</div>
+
+<!-- TITLE -->
+<div class="title-block">
+  <h1>Product Development Roadmap</h1>
+  <p>De MVP a plataforma consolidada — 5 ingenieros · B2B SaaS · Tier 2–3 European Clubs</p>
+  <div class="meta">
+    <div class="meta-item">Inicio: <strong>Abril 2026</strong></div>
+    <div class="meta-item">MVP Launch: <strong>Octubre 2026</strong></div>
+    <div class="meta-item">Horizonte: <strong>18 meses</strong></div>
+    <div class="meta-item">Team: <strong>5 engineers</strong></div>
+  </div>
+</div>
+
+<!-- METRICS -->
+<div class="metrics">
+  <div class="metric-card">
+    <div class="val">6</div>
+    <div class="label">meses hasta lanzamiento MVP</div>
+  </div>
+  <div class="metric-card">
+    <div class="val">5</div>
+    <div class="label">ingenieros · equipo fundador</div>
+  </div>
+  <div class="metric-card">
+    <div class="val">V3</div>
+    <div class="label">fases de evolución del producto</div>
+  </div>
+  <div class="metric-card">
+    <div class="val">DAU/MAU &gt;40%</div>
+    <div class="label">north star metric post-lanzamiento</div>
+  </div>
+</div>
+
+<!-- TIMELINE -->
+<div class="timeline-wrap" style="margin-top:40px; position:relative;">
+
+  <!-- AXIS LABELS -->
+  <div class="time-axis">
+    <div class="spacer"></div>
+    <div class="time-label phase-a">Abr<br>'26</div>
+    <div class="time-label phase-a">May<br>'26</div>
+    <div class="time-label phase-a">Jun<br>'26</div>
+    <div class="time-label phase-a">Jul<br>'26</div>
+    <div class="time-label phase-a">Ago<br>'26</div>
+    <div class="time-label phase-a">Sep<br>'26</div>
+    <div class="time-label phase-b">Oct<br>'26</div>
+    <div class="time-label phase-b">Nov<br>'26</div>
+    <div class="time-label phase-c">Dic<br>'26</div>
+    <div class="time-label phase-c">Ene<br>'27</div>
+    <div class="time-label phase-c">Feb<br>'27</div>
+    <div class="time-label phase-d">Mar–<br>Sep'27</div>
+  </div>
+
+  <!-- PHASE BANDS -->
+  <div class="phase-band">
+    <div class="spacer"></div>
+    <div class="phase-seg" style="grid-column:2/8; background:linear-gradient(90deg,rgba(0,200,150,0.35),rgba(0,200,150,0.15)); border-radius:4px 0 0 4px;"></div>
+    <div class="phase-seg" style="grid-column:8/10; background:linear-gradient(90deg,rgba(245,166,35,0.3),rgba(245,166,35,0.15));"></div>
+    <div class="phase-seg" style="grid-column:10/13; background:linear-gradient(90deg,rgba(74,158,255,0.25),rgba(74,158,255,0.15));"></div>
+    <div class="phase-seg" style="grid-column:13/14; background:linear-gradient(90deg,rgba(155,109,255,0.3),rgba(155,109,255,0.1)); border-radius:0 4px 4px 0;"></div>
+  </div>
+
+  <!-- PHASE LABELS row -->
+  <div class="time-axis" style="margin-bottom:16px;">
+    <div class="spacer"></div>
+    <div class="time-label phase-a" style="grid-column:2/8; text-align:left; padding-left:12px; font-size:11px; font-weight:700; letter-spacing:0.8px;">⬡ FASE 0 — MVP BUILD</div>
+    <div class="time-label phase-b" style="grid-column:8/10; font-size:11px; font-weight:700;">⬡ LAUNCH</div>
+    <div class="time-label phase-c" style="grid-column:10/13; font-size:11px; font-weight:700;">⬡ V2</div>
+    <div class="time-label phase-d" style="grid-column:13/14; font-size:11px; font-weight:700;">⬡ V3</div>
+  </div>
+
+  <!-- ==================== SECCIÓN: CORE FEATURES ==================== -->
+  <div class="section-header">
+    <div class="section-title">Core Features MVP</div>
+  </div>
+
+  <!-- ROW: Infraestructura & Data Pipeline -->
+  <div class="lane-row">
+    <div class="lane-label">Infra &amp; Data Pipeline</div>
+    <!-- cells 1-12 -->
+    <div class="cell" style="position:relative;">
+      <!-- bar spans col1-col3 (meses 1-3) -->
+      <div class="bar bar-teal" style="left:4px; right:-200%; width:calc(300% - 8px);"
+           data-tip="Setup infra, DB schema, ingesta de datos Opta/StatsBomb/Wyscout">
+        Infra · Data Ingestion
+      </div>
+    </div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+  </div>
+
+  <!-- ROW: Búsqueda & Filtrado -->
+  <div class="lane-row">
+    <div class="lane-label">Búsqueda &amp; Filtrado</div>
+    <div class="cell"></div>
+    <div class="cell" style="position:relative;">
+      <div class="bar bar-teal" style="left:4px; width:calc(200% - 8px);"
+           data-tip="Filtros por posición, edad, liga, métricas clave y Fit Score mínimo">
+        Player Search + Filters
+      </div>
+    </div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+  </div>
+
+  <!-- ROW: Fit Score (CORE DIFERENCIAL) -->
+  <div class="lane-row">
+    <div class="lane-label" style="color:var(--teal);">⚡ Fit Score Engine</div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell" style="position:relative;">
+      <div class="bar bar-teal" style="left:4px; width:calc(300% - 8px); background:linear-gradient(90deg,#00c896,#00e8ae);"
+           data-tip="Índice 0-100 · 4 dimensiones tácticas · Alta presión, juego combinativo, perfil ofensivo, adaptación">
+        Fit Score Algorithm (4 dimensiones)
+      </div>
+    </div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+  </div>
+
+  <!-- ROW: Perfil del Jugador -->
+  <div class="lane-row">
+    <div class="lane-label">Perfil del Jugador</div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell" style="position:relative;">
+      <div class="bar bar-teal" style="left:4px; width:calc(200% - 8px);"
+           data-tip="Radar 6 dimensiones · Stats temporada · Últimos 5 partidos · Desglose Fit Score en lenguaje natural">
+        Perfil + Radar 6D + Match History
+      </div>
+    </div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+  </div>
+
+  <!-- ROW: Shortlist & Alertas -->
+  <div class="lane-row">
+    <div class="lane-label">Shortlist &amp; Alertas</div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell" style="position:relative;">
+      <div class="bar bar-teal" style="left:4px; width:calc(200% - 8px);"
+           data-tip="Shortlist personalizada · Alertas de contratos próximos a vencer · Insights automáticos">
+        Shortlist + Contract Alerts + Insights
+      </div>
+    </div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+  </div>
+
+  <!-- ROW: QA & Beta -->
+  <div class="lane-row">
+    <div class="lane-label">QA · Beta · Polish</div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell" style="position:relative;">
+      <div class="bar bar-teal" style="left:4px; width:calc(100% - 8px);"
+           data-tip="QA integral · Performance · Beta privada con club piloto · Web responsive">
+        QA + Beta Piloto
+      </div>
+      <!-- MILESTONE: MVP LAUNCH -->
+      <div class="milestone ms-teal" style="right:-2px; top:50%; transform:translateY(-50%) translateX(50%);"
+           title="🚀 MVP Launch — Octubre 2026">🚀</div>
+    </div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+  </div>
+
+  <!-- ==================== SECCIÓN: POST-MVP MES 1 ==================== -->
+  <div class="section-header">
+    <div class="section-title">Mes 1 Post-Lanzamiento — Aprender del primer cliente real</div>
+  </div>
+
+  <!-- ROW: Sem 1 Onboarding -->
+  <div class="lane-row">
+    <div class="lane-label">Sem 1 · Onboarding</div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell" style="position:relative;">
+      <div class="bar bar-amber" style="left:4px; width:calc(50% - 4px); font-size:10px;"
+           data-tip="Setup club (esquema táctico) · Sesión en vivo con Director Deportivo · Carga inicial de shortlist">
+        Onboarding #1
+      </div>
+    </div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+  </div>
+
+  <!-- ROW: Sem 2-3 Feedback -->
+  <div class="lane-row">
+    <div class="lane-label">Sem 2-3 · Feedback</div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell" style="position:relative;">
+      <div class="bar bar-amber" style="left:calc(50% + 2px); width:calc(100% - 6px); font-size:10px;"
+           data-tip="2-3 entrevistas estructuradas · Análisis uso: pantallas visitadas, drop-offs · Identificación de friction points">
+        Feedback + Iteración rápida
+      </div>
+    </div>
+    <div class="cell" style="position:relative;">
+      <div class="bar bar-amber" style="left:0; width:calc(50% - 4px); font-size:10px;"></div>
+    </div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+  </div>
+
+  <!-- ROW: Sem 4 Expansión -->
+  <div class="lane-row">
+    <div class="lane-label">Sem 4 · Expansión</div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell" style="position:relative;">
+      <div class="bar bar-amber" style="left:calc(50% + 2px); width:calc(50% - 6px); font-size:10px;"
+           data-tip="Caso de estudio cliente #1 · Identificar cliente #2 · Backlog V2 priorizado con evidencia real">
+        Base expansión
+      </div>
+      <div class="milestone ms-amber" style="right:0px; top:50%; transform:translateY(-50%) translateX(50%);"
+           title="📊 1er mes completado — Pipeline ventas activado">📊</div>
+    </div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+  </div>
+
+  <!-- ==================== SECCIÓN: V2 ==================== -->
+  <div class="section-header">
+    <div class="section-title">V2 — Profundidad táctica y expansión de usuarios</div>
+  </div>
+
+  <!-- ROW: Fit Score configurable -->
+  <div class="lane-row">
+    <div class="lane-label">Custom Fit Score</div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell" style="position:relative;">
+      <div class="bar bar-blue" style="left:4px; width:calc(200% - 8px);"
+           data-tip="Cada club configura sus propios pesos por dimensión según su modelo de juego">
+        Fit Score configurable por club
+      </div>
+    </div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+  </div>
+
+  <!-- ROW: Coach Module -->
+  <div class="lane-row">
+    <div class="lane-label">Módulo Entrenador</div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell" style="position:relative;">
+      <div class="bar bar-blue" style="left:4px; width:calc(200% - 8px);"
+           data-tip="Usuario: Entrenador · Análisis rendimiento en entrenamiento · Diferente JTBD al Director Deportivo">
+        Coach Module (usuario V2)
+      </div>
+    </div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+  </div>
+
+  <!-- ROW: Comparación Multi-Liga -->
+  <div class="lane-row">
+    <div class="lane-label">Multi-Liga Norm.</div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell" style="position:relative;">
+      <div class="bar bar-blue" style="left:4px; width:calc(150% - 8px); font-size:10px;"
+           data-tip="Comparación normalizada entre ligas · Requiere data science · Serie B vs Premier League">
+        Normalización multi-liga
+      </div>
+    </div>
+    <div class="cell"></div>
+  </div>
+
+  <!-- ROW: Scout Collaboration -->
+  <div class="lane-row">
+    <div class="lane-label">Scout Workflow</div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell" style="position:relative;">
+      <div class="bar bar-blue" style="left:4px; width:calc(150% - 8px); font-size:10px;"
+           data-tip="Chat con scouts · Workflow colaborativo · Anotaciones sobre jugadores">
+        Chat scouts + colaboración
+      </div>
+    </div>
+    <div class="cell"></div>
+  </div>
+
+  <!-- ==================== SECCIÓN: V3 ==================== -->
+  <div class="section-header">
+    <div class="section-title">V3 — Plataforma consolidada (Horizonte 12–18 meses)</div>
+  </div>
+
+  <!-- ROW: Video Integration -->
+  <div class="lane-row">
+    <div class="lane-label">Video Integration</div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell" style="position:relative;">
+      <div class="bar bar-purple" style="left:4px; right:8px; width:calc(100% - 12px); font-size:10px;"
+           data-tip="Clips de jugadores integrados · Licencias costosas — diferido a V3 · Requiere acuerdos comerciales">
+        Video de jugadores (licencias)
+      </div>
+    </div>
+  </div>
+
+  <!-- ROW: ML Projections -->
+  <div class="lane-row">
+    <div class="lane-label">ML Proyecciones</div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell" style="position:relative;">
+      <div class="bar bar-purple" style="left:4px; right:8px; width:calc(100% - 12px); font-size:10px;"
+           data-tip="Proyecciones de rendimiento futuro · Requiere ML y volumen de data histórica suficiente">
+        Performance Projections (ML)
+      </div>
+    </div>
+  </div>
+
+  <!-- ROW: Marketplace + App Móvil -->
+  <div class="lane-row">
+    <div class="lane-label">Marketplace + Mobile</div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell" style="position:relative;">
+      <div class="bar bar-purple" style="left:4px; right:8px; width:calc(100% - 12px); font-size:10px;"
+           data-tip="Data marketplace de proveedores externos · App móvil nativa (web responsive suficiente en MVP)">
+        Data Marketplace + Native App
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== SECCIÓN: MÉTRICAS ==================== -->
+  <div class="section-header">
+    <div class="section-title">Métricas de Éxito — Tracking continuo</div>
+  </div>
+
+  <!-- ROW: KPIs -->
+  <div class="lane-row">
+    <div class="lane-label">KPIs activos</div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell" style="position:relative;">
+      <div class="bar bar-teal-outline" style="left:4px; width:calc(100% - 8px); font-size:10px;"
+           data-tip="Evaluación &lt;10 min · Shortlist &gt;5 jugadores/usuario · DAU/MAU &gt;40%">
+        DAU/MAU · Eval &lt;10min · NPS&gt;40
+      </div>
+    </div>
+    <div class="cell" style="position:relative;">
+      <div class="bar bar-teal-outline" style="left:0; width:calc(100% - 4px); font-size:10px;"></div>
+    </div>
+    <div class="cell" style="position:relative;">
+      <div class="bar bar-teal-outline" style="left:0; width:calc(100% - 4px); font-size:10px;"
+           data-tip="1 conversión a pago al mes 3 · Validación modelo B2B SaaS">
+        Conversión pago M3
+      </div>
+    </div>
+    <div class="cell" style="position:relative;">
+      <div class="bar bar-teal-outline" style="left:0; width:calc(100% - 4px); font-size:10px;"></div>
+    </div>
+    <div class="cell" style="position:relative;">
+      <div class="bar bar-teal-outline" style="left:0; width:calc(200% - 4px); font-size:10px;"
+           data-tip="Churn rate · Revenue expansion · # clubes activos">
+        Revenue · Expansion · Churn
+      </div>
+    </div>
+    <div class="cell"></div>
+  </div>
+
+</div>
+<!-- END TIMELINE -->
+
+<!-- LEGEND -->
+<div class="legend">
+  <div class="legend-title">Leyenda</div>
+  <div class="legend-item">
+    <div class="legend-dot" style="background:linear-gradient(90deg,#00c896,#00a882);"></div>
+    Fase 0 — MVP Build (6 meses)
+  </div>
+  <div class="legend-item">
+    <div class="legend-dot" style="background:linear-gradient(90deg,#f5a623,#e08c10);"></div>
+    Launch + Mes 1 Post-MVP
+  </div>
+  <div class="legend-item">
+    <div class="legend-dot" style="background:linear-gradient(90deg,#4a9eff,#2e7de0);"></div>
+    V2 — Profundidad táctica
+  </div>
+  <div class="legend-item">
+    <div class="legend-dot" style="background:linear-gradient(90deg,#9b6dff,#7a50e0);"></div>
+    V3 — Plataforma consolidada
+  </div>
+  <div class="legend-item">
+    <div class="legend-dot" style="background:transparent; border:1.5px solid #00c896; border-radius:3px;"></div>
+    KPIs y métricas de tracking
+  </div>
+  <div class="legend-item">
+    <span style="font-size:14px;">🚀</span> Milestone: MVP Launch
+  </div>
+  <div class="legend-item">
+    <span style="font-size:14px;">📊</span> Milestone: Pipeline ventas activado
+  </div>
+  <div class="legend-item" style="margin-left:auto; color:var(--muted); font-size:11px; font-style:italic;">
+    Hover sobre las barras para ver detalles
+  </div>
+</div>
+
+<div style="max-width:1200px; margin:20px auto 0; font-size:11px; color:var(--muted); text-align:right;">
+  ScoutIQ — Player Intelligence Platform · Roadmap v1.0 · Abril 2026
+</div>
+
+</body>
+</html>
