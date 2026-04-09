@@ -245,6 +245,16 @@ tbody tr:hover td { background: #F8FAFC; }
 .login-field { margin-bottom: 16px; }
 .login-field label { display: flex; justify-content: space-between; align-items: center; font-size: 12px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 7px; }
 .login-hint { font-size: 11px; font-weight: 400; color: #10B981; text-transform: none; letter-spacing: 0; opacity: 0.85; }
+.login-demo-alert {
+  display: flex; align-items: center; gap: 10px;
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin-bottom: 22px;
+  font-size: 13px; color: #6EE7B7;
+}
+.login-demo-alert svg { flex-shrink: 0; opacity: 0.9; }
 .login-field input {
   width: 100%; padding: 12px 16px;
   background: #0F172A; border: 1px solid rgba(255,255,255,0.08);
@@ -426,12 +436,17 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <p>Enter your credentials to continue</p>
     </div>
 
+    <div class="login-demo-alert">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      Demo — User: <strong style="margin:0 3px;color:#F1F5F9;">admin</strong> / Password: <strong style="margin:0 3px;color:#F1F5F9;">admin</strong>
+    </div>
+
     <div class="login-field">
-      <label>Username <span class="login-hint">You can use "admin"</span></label>
+      <label>Username</label>
       <input type="text" id="login-user" placeholder="admin" autocomplete="username" />
     </div>
     <div class="login-field">
-      <label>Password <span class="login-hint">You can use "admin"</span></label>
+      <label>Password</label>
       <input type="password" id="login-pass" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter') doLogin()" />
     </div>
 
