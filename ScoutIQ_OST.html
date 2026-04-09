@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ScoutIQ — Opportunity Solution Tree</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0d0f14;
+      --surface:   #13161f;
+      --surface2:  #1a1f2e;
+      --border:    #1f2638;
+      --green:     #34d399;
+      --green-dim: #1a7a5a;
+      --blue:      #4f8ef7;
+      --purple:    #7c5cfc;
+      --amber:     #f59e0b;
+      --red:       #f87171;
+      --text:      #e8eaf0;
+      --muted:     #6b7a99;
+      --faint:     #2a3348;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ── Header ────────────────────────────────────────────────────────────── */
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 36px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+    }
+    .logo-row { display: flex; align-items: center; gap: 12px; }
+    .logo-box {
+      width: 38px; height: 38px; border-radius: 9px;
+      background: linear-gradient(135deg, #1f7a5c, #34d399);
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: 14px; color: #fff;
+    }
+    .logo-text { font-size: 1.15rem; font-weight: 700; color: #fff; }
+    .logo-sub  { font-size: 0.75rem; color: var(--muted); margin-top: 1px; }
+    .header-badge {
+      background: var(--faint); border: 1px solid var(--border);
+      border-radius: 20px; padding: 5px 14px;
+      font-size: 0.72rem; font-weight: 600; color: var(--muted);
+      letter-spacing: 0.5px;
+    }
+
+    /* ── Page layout ────────────────────────────────────────────────────────── */
+    .page { padding: 40px 36px 60px; max-width: 1200px; margin: 0 auto; }
+
+    .page-title {
+      font-size: 1.6rem; font-weight: 700; margin-bottom: 6px;
+      background: linear-gradient(90deg, #fff, #a0b4d6);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .page-desc { font-size: 0.9rem; color: var(--muted); margin-bottom: 40px; max-width: 680px; line-height: 1.6; }
+
+    /* ── Legend ─────────────────────────────────────────────────────────────── */
+    .legend {
+      display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 48px;
+    }
+    .legend-item {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 0.78rem; color: var(--muted);
+    }
+    .legend-dot {
+      width: 10px; height: 10px; border-radius: 50%;
+    }
+
+    /* ── Tree ────────────────────────────────────────────────────────────────── */
+    .tree {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    /* ── Row ─────────────────────────────────────────────────────────────────── */
+    .row {
+      display: flex;
+      align-items: flex-start;
+      gap: 0;
+      position: relative;
+    }
+
+    .row-label {
+      width: 88px;
+      flex-shrink: 0;
+      padding-top: 22px;
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 1.1px;
+      text-transform: uppercase;
+      color: var(--muted);
+      text-align: right;
+      padding-right: 16px;
+    }
+
+    .row-nodes {
+      flex: 1;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      padding: 0 0 0 0;
+      position: relative;
+    }
+
+    /* Connector line between rows */
+    .connector-area {
+      height: 36px;
+      display: flex;
+      align-items: center;
+      padding-left: 88px;
+    }
+    .connector-line {
+      width: 2px;
+      height: 100%;
+      background: linear-gradient(to bottom, var(--faint), var(--faint));
+      margin-left: 0;
+      position: relative;
+    }
+    .connector-line::after {
+      content: '';
+      position: absolute;
+      bottom: -5px; left: 50%;
+      transform: translateX(-50%);
+      border-left: 5px solid transparent;
+      border-right: 5px solid transparent;
+      border-top: 7px solid var(--faint);
+    }
+
+    /* ── Node cards ──────────────────────────────────────────────────────────── */
+    .node {
+      border-radius: 14px;
+      padding: 16px 18px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+      cursor: default;
+      position: relative;
+    }
+    .node:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 28px rgba(0,0,0,0.35);
+    }
+
+    /* Goal node */
+    .node-goal {
+      background: linear-gradient(135deg, #0f2a20, #142e25);
+      border-color: var(--green-dim);
+      flex: 1 0 100%;
+    }
+    .node-goal:hover { border-color: var(--green); box-shadow: 0 8px 28px rgba(52,211,153,0.12); }
+    .node-goal .node-label { color: var(--green); }
+    .node-goal .node-title { font-size: 1.05rem; }
+
+    /* Opportunity nodes */
+    .node-opp {
+      flex: 1 1 200px;
+      min-width: 200px;
+    }
+    .node-opp:hover { border-color: var(--blue); box-shadow: 0 8px 28px rgba(79,142,247,0.1); }
+    .node-opp .node-label { color: var(--blue); }
+
+    /* Solution nodes */
+    .node-sol {
+      flex: 1 1 170px;
+      min-width: 170px;
+    }
+    .node-sol:hover { border-color: var(--purple); box-shadow: 0 8px 28px rgba(124,92,252,0.1); }
+    .node-sol .node-label { color: var(--purple); }
+
+    /* North Star node */
+    .node-ns {
+      flex: 1 0 100%;
+      background: linear-gradient(135deg, #1c1505, #221a06);
+      border-color: #78350f;
+    }
+    .node-ns:hover { border-color: var(--amber); box-shadow: 0 8px 28px rgba(245,158,11,0.12); }
+    .node-ns .node-label { color: var(--amber); }
+    .node-ns .node-title { color: var(--amber); }
+
+    .node-label {
+      font-size: 0.62rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .node-title {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.3;
+      margin-bottom: 5px;
+    }
+    .node-desc {
+      font-size: 0.77rem;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    /* Tag chips */
+    .node-tags {
+      display: flex; flex-wrap: wrap; gap: 5px; margin-top: 9px;
+    }
+    .tag {
+      font-size: 0.67rem;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 20px;
+      border: 1px solid;
+    }
+    .tag-blue   { color: var(--blue);   border-color: rgba(79,142,247,0.3);   background: rgba(79,142,247,0.07); }
+    .tag-purple { color: var(--purple); border-color: rgba(124,92,252,0.3);   background: rgba(124,92,252,0.07); }
+    .tag-green  { color: var(--green);  border-color: rgba(52,211,153,0.3);   background: rgba(52,211,153,0.07); }
+    .tag-amber  { color: var(--amber);  border-color: rgba(245,158,11,0.3);   background: rgba(245,158,11,0.07); }
+
+    /* In/Out MVP badge */
+    .mvp-badge {
+      position: absolute; top: 12px; right: 12px;
+      font-size: 0.6rem; font-weight: 700;
+      padding: 2px 7px; border-radius: 20px;
+      letter-spacing: 0.5px;
+    }
+    .mvp-in  { background: rgba(52,211,153,0.15); color: var(--green);  border: 1px solid rgba(52,211,153,0.25); }
+    .mvp-out { background: rgba(107,122,153,0.12); color: var(--muted); border: 1px solid rgba(107,122,153,0.2); }
+
+    /* ── Arrow connectors SVG ────────────────────────────────────────────────── */
+    .divider-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 0 8px 88px;
+    }
+    .divider-arrow {
+      display: flex; align-items: center; gap: 6px;
+      color: var(--faint); font-size: 1.1rem;
+    }
+    .divider-label {
+      font-size: 0.68rem; color: var(--faint);
+      font-weight: 600; letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+    .divider-line {
+      flex: 1; height: 1px;
+      background: linear-gradient(to right, var(--faint), transparent);
+    }
+
+    /* ── Metric callout at bottom ────────────────────────────────────────────── */
+    .metric-section {
+      margin-top: 52px;
+      padding-top: 36px;
+      border-top: 1px solid var(--border);
+    }
+    .metric-section-title {
+      font-size: 1rem; font-weight: 700; margin-bottom: 4px; color: var(--text);
+    }
+    .metric-section-desc {
+      font-size: 0.82rem; color: var(--muted); margin-bottom: 22px; line-height: 1.6;
+    }
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 14px;
+    }
+    .metric-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+    }
+    .metric-card.ns {
+      border-color: #78350f;
+      background: linear-gradient(135deg, #1c1505, #221a06);
+      grid-column: span 2;
+    }
+    .metric-card .m-label {
+      font-size: 0.65rem; font-weight: 700; letter-spacing: 0.9px;
+      text-transform: uppercase; color: var(--muted); margin-bottom: 5px;
+    }
+    .metric-card.ns .m-label { color: var(--amber); }
+    .metric-card .m-value {
+      font-size: 1rem; font-weight: 700; color: var(--text); margin-bottom: 4px;
+    }
+    .metric-card.ns .m-value { color: var(--amber); font-size: 1.05rem; }
+    .metric-card .m-desc {
+      font-size: 0.75rem; color: var(--muted); line-height: 1.5;
+    }
+
+    footer {
+      text-align: center; padding: 28px;
+      font-size: 0.72rem; color: var(--faint);
+      border-top: 1px solid var(--border);
+    }
+
+    @media (max-width: 700px) {
+      .page { padding: 24px 18px 48px; }
+      header { padding: 16px 18px; }
+      .row-label { width: 60px; font-size: 0.58rem; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo-row">
+    <div class="logo-box">SQ</div>
+    <div>
+      <div class="logo-text">ScoutIQ</div>
+      <div class="logo-sub">Player Intelligence Platform</div>
+    </div>
+  </div>
+  <div class="header-badge">Opportunity Solution Tree · MVP v1</div>
+</header>
+
+<div class="page">
+
+  <div class="page-title">Opportunity Solution Tree</div>
+  <div class="page-desc">
+    Maps the validated pain points of mid-tier European clubs (Tier 2–3) to the MVP features designed to address them,
+    anchored to a single measurable outcome. Read top-to-bottom: Goal → Opportunities → Solutions → Metric.
+  </div>
+
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:#34d399"></div>Desired Outcome</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#4f8ef7"></div>Opportunity (Pain Point)</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#7c5cfc"></div>Solution (MVP Feature)</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#f59e0b"></div>North Star Metric</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#34d399;opacity:0.4"></div>In MVP</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#6b7a99;opacity:0.4"></div>Post-MVP</div>
+  </div>
+
+  <div class="tree">
+
+    <!-- ── GOAL ─────────────────────────────────────────────────────────────── -->
+    <div class="row">
+      <div class="row-label">Goal</div>
+      <div class="row-nodes">
+        <div class="node node-goal">
+          <div class="node-label">Desired Outcome</div>
+          <div class="node-title">Sporting Directors at mid-tier European clubs make faster, better-informed transfer decisions</div>
+          <div class="node-desc">Reduce the gap between raw player data and actionable insight — from days of manual analysis to a single, contextualised evaluation session.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- arrow -->
+    <div class="divider-row">
+      <div class="divider-arrow">↓</div>
+      <div class="divider-label">Broken down into</div>
+      <div class="divider-line"></div>
+    </div>
+
+    <!-- ── OPPORTUNITIES ─────────────────────────────────────────────────────── -->
+    <div class="row">
+      <div class="row-label">Opportunities</div>
+      <div class="row-nodes">
+
+        <div class="node node-opp">
+          <div class="node-label">Pain Point 1</div>
+          <div class="node-title">Fragmented data sources</div>
+          <div class="node-desc">Clubs simultaneously work with Wyscout, scout PDF reports, and Excel. No synthesis layer exists — the Sporting Director must manually integrate everything.</div>
+          <div class="node-tags">
+            <span class="tag tag-blue">Workflow</span>
+            <span class="tag tag-blue">Data</span>
+          </div>
+        </div>
+
+        <div class="node node-opp">
+          <div class="node-label">Pain Point 2</div>
+          <div class="node-title">Lack of tactical context</div>
+          <div class="node-desc">Data shows absolute stats but not whether the player fits the club's playing system. Stats without context produce poor decisions.</div>
+          <div class="node-tags">
+            <span class="tag tag-blue">Insight</span>
+            <span class="tag tag-blue">Tactical</span>
+          </div>
+        </div>
+
+        <div class="node node-opp">
+          <div class="node-label">Pain Point 3</div>
+          <div class="node-title">Long decision cycles</div>
+          <div class="node-desc">Evaluating a transfer candidate takes 2–3 days. Transfer windows are short and competitive — slow decisions mean missed signings.</div>
+          <div class="node-tags">
+            <span class="tag tag-blue">Speed</span>
+            <span class="tag tag-blue">Efficiency</span>
+          </div>
+        </div>
+
+        <div class="node node-opp">
+          <div class="node-label">Pain Point 4</div>
+          <div class="node-title">Scout bias</div>
+          <div class="node-desc">Decisions rely too heavily on the subjective perception of individual observers. Million-euro calls need more than one person's opinion.</div>
+          <div class="node-tags">
+            <span class="tag tag-blue">Objectivity</span>
+            <span class="tag tag-blue">Risk</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- arrow -->
+    <div class="divider-row">
+      <div class="divider-arrow">↓</div>
+      <div class="divider-label">Addressed by</div>
+      <div class="divider-line"></div>
+    </div>
+
+    <!-- ── SOLUTIONS ──────────────────────────────────────────────────────────── -->
+    <div class="row">
+      <div class="row-label">Solutions</div>
+      <div class="row-nodes">
+
+        <div class="node node-sol">
+          <span class="mvp-badge mvp-in">✓ MVP</span>
+          <div class="node-label">Addresses P1, P3</div>
+          <div class="node-title">Player search & filtering</div>
+          <div class="node-desc">Unified search by position, league, age, and metrics. Replaces the multi-source lookup.</div>
+          <div class="node-tags"><span class="tag tag-purple">Core feature</span></div>
+        </div>
+
+        <div class="node node-sol">
+          <span class="mvp-badge mvp-in">✓ MVP</span>
+          <div class="node-label">Addresses P2, P4</div>
+          <div class="node-title">Tactical Fit Score</div>
+          <div class="node-desc">0–100 index measuring how well a player's profile matches the club's tactical system. Objective, configurable, context-aware.</div>
+          <div class="node-tags"><span class="tag tag-purple">Differentiator</span></div>
+        </div>
+
+        <div class="node node-sol">
+          <span class="mvp-badge mvp-in">✓ MVP</span>
+          <div class="node-label">Addresses P2, P4</div>
+          <div class="node-title">6-dimension performance radar</div>
+          <div class="node-desc">Visual profile across pressing, combination play, offensive output, and tactical adaptability — in one view.</div>
+          <div class="node-tags"><span class="tag tag-purple">Core feature</span></div>
+        </div>
+
+        <div class="node node-sol">
+          <span class="mvp-badge mvp-in">✓ MVP</span>
+          <div class="node-label">Addresses P1, P2, P3</div>
+          <div class="node-title">Automated insights from Fit Score</div>
+          <div class="node-desc">Natural-language explanation of the Fit Score breakdown. Informed decision in &lt; 5 minutes, no manual interpretation required.</div>
+          <div class="node-tags"><span class="tag tag-purple">Differentiator</span></div>
+        </div>
+
+        <div class="node node-sol">
+          <span class="mvp-badge mvp-in">✓ MVP</span>
+          <div class="node-label">Addresses P1, P3</div>
+          <div class="node-title">Personalised shortlist</div>
+          <div class="node-desc">Persistent pipeline per Sporting Director. The platform replaces the spreadsheet as the single source of truth.</div>
+          <div class="node-tags"><span class="tag tag-purple">Core feature</span></div>
+        </div>
+
+        <div class="node node-sol">
+          <span class="mvp-badge mvp-in">✓ MVP</span>
+          <div class="node-label">Addresses P3</div>
+          <div class="node-title">Contract expiry alerts</div>
+          <div class="node-desc">Surfaces market opportunities before the window opens — turns reactive scouting into proactive pipeline management.</div>
+          <div class="node-tags"><span class="tag tag-purple">Core feature</span></div>
+        </div>
+
+        <div class="node node-sol" style="opacity:0.55;">
+          <span class="mvp-badge mvp-out">V2</span>
+          <div class="node-label">Addresses P1, P2</div>
+          <div class="node-title">Cross-league normalised comparison</div>
+          <div class="node-desc">Compare players across leagues using adjusted statistics. Requires significant data science work — deferred to V2.</div>
+          <div class="node-tags"><span class="tag" style="color:var(--muted);border-color:rgba(107,122,153,0.25);background:rgba(107,122,153,0.07);">Post-MVP</span></div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- arrow -->
+    <div class="divider-row">
+      <div class="divider-arrow">↓</div>
+      <div class="divider-label">Measured by</div>
+      <div class="divider-line"></div>
+    </div>
+
+    <!-- ── NORTH STAR METRIC ──────────────────────────────────────────────────── -->
+    <div class="row">
+      <div class="row-label" style="color:var(--amber)">Metric</div>
+      <div class="row-nodes">
+        <div class="node node-ns">
+          <div class="node-label">⭐ North Star Metric</div>
+          <div class="node-title">Insight-to-Decision Rate &gt; 30%</div>
+          <div class="node-desc" style="margin-top:6px; max-width: 700px;">
+            <strong style="color:#fbbf24">Target:</strong> More than 30% of Fit Score profiles viewed by the Sporting Director result in an active shortlist action — within the first transfer window after launch.
+            <br/><br/>
+            This metric bridges "data consumed" and "decision made". It is the only metric that directly validates the core hypothesis: that the platform's insights translate into real transfer decisions, not just passive engagement.
+          </div>
+          <div class="node-tags" style="margin-top:14px;">
+            <span class="tag tag-amber">Trackable in-app</span>
+            <span class="tag tag-amber">Validates core hypothesis</span>
+            <span class="tag tag-amber">Leading indicator of outcome</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /tree -->
+
+  <!-- ── Full metrics summary ─────────────────────────────────────────────── -->
+  <div class="metric-section">
+    <div class="metric-section-title">Section 7 — MVP Success Metrics at a glance</div>
+    <div class="metric-section-desc">Operational metrics are tracked in-app from day one. The outcome indicator is validated through structured interviews at week 2 and week 4 of the Month 1 Roadmap.</div>
+
+    <div class="metric-grid">
+      <div class="metric-card ns">
+        <div class="m-label">⭐ North Star</div>
+        <div class="m-value">Insight-to-Decision Rate &gt; 30%</div>
+        <div class="m-desc">% of Fit Score profiles viewed that result in a shortlist action. Directly measures if insights drive decisions.</div>
+      </div>
+
+      <div class="metric-card">
+        <div class="m-label">Adoption</div>
+        <div class="m-value">DAU / MAU &gt; 40%</div>
+        <div class="m-desc">Platform used actively, not just post-launch.</div>
+      </div>
+
+      <div class="metric-card">
+        <div class="m-label">Perceived Value</div>
+        <div class="m-value">NPS &gt; 40 at week 4</div>
+        <div class="m-desc">Early indicator of retention and word-of-mouth.</div>
+      </div>
+
+      <div class="metric-card">
+        <div class="m-label">Efficiency</div>
+        <div class="m-value">Evaluation &lt; 10 min</div>
+        <div class="m-desc">Vs. 2–3 day benchmark with manual process.</div>
+      </div>
+
+      <div class="metric-card">
+        <div class="m-label">Engagement</div>
+        <div class="m-value">&gt; 5 players shortlisted / user</div>
+        <div class="m-desc">Scouting workflow migrated to the platform.</div>
+      </div>
+
+      <div class="metric-card">
+        <div class="m-label">Business</div>
+        <div class="m-value">1 paid conversion by month 3</div>
+        <div class="m-desc">Validates the B2B SaaS monetisation model.</div>
+      </div>
+
+      <div class="metric-card" style="border-color:rgba(52,211,153,0.25); background: rgba(52,211,153,0.04);">
+        <div class="m-label" style="color:var(--green)">Outcome (lagging)</div>
+        <div class="m-value" style="color:var(--green); font-size:0.88rem;">≥ 1 shortlisted player advances to formal transfer consideration in window 1</div>
+        <div class="m-desc">Validates core hypothesis. Tracked via client interviews — not in-app data.</div>
+      </div>
+    </div>
+
+  </div>
+
+</div><!-- /page -->
+
+<footer>ScoutIQ · Opportunity Solution Tree · Internal use only · 2026</footer>
+
+</body>
+</html>
