@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ScoutIQ — Árbol de Oportunidades y Soluciones</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0d0f14;
+      --surface:   #13161f;
+      --surface2:  #1a1f2e;
+      --border:    #1f2638;
+      --green:     #34d399;
+      --green-dim: #1a7a5a;
+      --blue:      #4f8ef7;
+      --purple:    #7c5cfc;
+      --amber:     #f59e0b;
+      --text:      #e8eaf0;
+      --muted:     #6b7a99;
+      --faint:     #2a3348;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ── Header ── */
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 36px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+    }
+    .logo-row { display: flex; align-items: center; gap: 12px; }
+    .logo-box {
+      width: 38px; height: 38px; border-radius: 9px;
+      background: linear-gradient(135deg, #1f7a5c, #34d399);
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: 14px; color: #fff;
+    }
+    .logo-text { font-size: 1.15rem; font-weight: 700; color: #fff; }
+    .logo-sub  { font-size: 0.75rem; color: var(--muted); margin-top: 1px; }
+    .header-badge {
+      background: var(--faint); border: 1px solid var(--border);
+      border-radius: 20px; padding: 5px 14px;
+      font-size: 0.72rem; font-weight: 600; color: var(--muted);
+      letter-spacing: 0.5px;
+    }
+
+    /* ── Page ── */
+    .page { padding: 40px 36px 60px; max-width: 1200px; margin: 0 auto; }
+
+    .page-title {
+      font-size: 1.6rem; font-weight: 700; margin-bottom: 6px;
+      background: linear-gradient(90deg, #fff, #a0b4d6);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .page-desc { font-size: 0.9rem; color: var(--muted); margin-bottom: 40px; max-width: 680px; line-height: 1.6; }
+
+    /* ── Legend ── */
+    .legend { display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 48px; }
+    .legend-item { display: flex; align-items: center; gap: 8px; font-size: 0.78rem; color: var(--muted); }
+    .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+
+    /* ── Tree ── */
+    .tree { display: flex; flex-direction: column; gap: 0; }
+
+    .row { display: flex; align-items: flex-start; position: relative; }
+    .row-label {
+      width: 88px; flex-shrink: 0; padding-top: 22px;
+      font-size: 0.65rem; font-weight: 700; letter-spacing: 1.1px;
+      text-transform: uppercase; color: var(--muted);
+      text-align: right; padding-right: 16px;
+    }
+    .row-nodes { flex: 1; display: flex; flex-wrap: wrap; gap: 14px; }
+
+    .divider-row {
+      display: flex; align-items: center; gap: 12px;
+      padding: 8px 0 8px 88px;
+    }
+    .divider-arrow { display: flex; align-items: center; gap: 6px; color: var(--faint); font-size: 1.1rem; }
+    .divider-label { font-size: 0.68rem; color: var(--faint); font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; }
+    .divider-line { flex: 1; height: 1px; background: linear-gradient(to right, var(--faint), transparent); }
+
+    /* ── Nodes ── */
+    .node {
+      border-radius: 14px; padding: 16px 18px;
+      border: 1px solid var(--border); background: var(--surface);
+      transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+      cursor: default; position: relative;
+    }
+    .node:hover { transform: translateY(-3px); box-shadow: 0 8px 28px rgba(0,0,0,0.35); }
+
+    .node-goal { background: linear-gradient(135deg,#0f2a20,#142e25); border-color:var(--green-dim); flex:1 0 100%; }
+    .node-goal:hover { border-color:var(--green); box-shadow:0 8px 28px rgba(52,211,153,0.12); }
+    .node-goal .node-label { color:var(--green); }
+    .node-goal .node-title { font-size:1.05rem; }
+
+    .node-opp { flex:1 1 200px; min-width:200px; }
+    .node-opp:hover { border-color:var(--blue); box-shadow:0 8px 28px rgba(79,142,247,0.1); }
+    .node-opp .node-label { color:var(--blue); }
+
+    .node-sol { flex:1 1 170px; min-width:170px; }
+    .node-sol:hover { border-color:var(--purple); box-shadow:0 8px 28px rgba(124,92,252,0.1); }
+    .node-sol .node-label { color:var(--purple); }
+
+    .node-ns { flex:1 0 100%; background:linear-gradient(135deg,#1c1505,#221a06); border-color:#78350f; }
+    .node-ns:hover { border-color:var(--amber); box-shadow:0 8px 28px rgba(245,158,11,0.12); }
+    .node-ns .node-label { color:var(--amber); }
+    .node-ns .node-title { color:var(--amber); }
+
+    .node-label { font-size:0.62rem; font-weight:700; letter-spacing:1px; text-transform:uppercase; margin-bottom:6px; }
+    .node-title { font-size:0.9rem; font-weight:700; color:var(--text); line-height:1.3; margin-bottom:5px; }
+    .node-desc  { font-size:0.77rem; color:var(--muted); line-height:1.55; }
+
+    .node-tags { display:flex; flex-wrap:wrap; gap:5px; margin-top:9px; }
+    .tag { font-size:0.67rem; font-weight:600; padding:2px 8px; border-radius:20px; border:1px solid; }
+    .tag-blue   { color:var(--blue);   border-color:rgba(79,142,247,0.3);   background:rgba(79,142,247,0.07); }
+    .tag-purple { color:var(--purple); border-color:rgba(124,92,252,0.3);   background:rgba(124,92,252,0.07); }
+    .tag-green  { color:var(--green);  border-color:rgba(52,211,153,0.3);   background:rgba(52,211,153,0.07); }
+    .tag-amber  { color:var(--amber);  border-color:rgba(245,158,11,0.3);   background:rgba(245,158,11,0.07); }
+    .tag-muted  { color:var(--muted);  border-color:rgba(107,122,153,0.25); background:rgba(107,122,153,0.07); }
+
+    .mvp-badge {
+      position:absolute; top:12px; right:12px;
+      font-size:0.6rem; font-weight:700; padding:2px 7px; border-radius:20px; letter-spacing:0.5px;
+    }
+    .mvp-in  { background:rgba(52,211,153,0.15); color:var(--green);  border:1px solid rgba(52,211,153,0.25); }
+    .mvp-out { background:rgba(107,122,153,0.12); color:var(--muted); border:1px solid rgba(107,122,153,0.2); }
+
+    /* ── Metric summary ── */
+    .metric-section { margin-top:52px; padding-top:36px; border-top:1px solid var(--border); }
+    .metric-section-title { font-size:1rem; font-weight:700; margin-bottom:4px; }
+    .metric-section-desc  { font-size:0.82rem; color:var(--muted); margin-bottom:22px; line-height:1.6; }
+    .metric-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:14px; }
+    .metric-card { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:16px; }
+    .metric-card.ns { border-color:#78350f; background:linear-gradient(135deg,#1c1505,#221a06); grid-column:span 2; }
+    .metric-card .m-label { font-size:0.65rem; font-weight:700; letter-spacing:0.9px; text-transform:uppercase; color:var(--muted); margin-bottom:5px; }
+    .metric-card.ns .m-label { color:var(--amber); }
+    .metric-card .m-value { font-size:1rem; font-weight:700; color:var(--text); margin-bottom:4px; }
+    .metric-card.ns .m-value { color:var(--amber); font-size:1.05rem; }
+    .metric-card .m-desc { font-size:0.75rem; color:var(--muted); line-height:1.5; }
+
+    footer { text-align:center; padding:28px; font-size:0.72rem; color:var(--faint); border-top:1px solid var(--border); }
+
+    @media (max-width:700px) {
+      .page { padding:24px 18px 48px; }
+      header { padding:16px 18px; }
+      .row-label { width:60px; font-size:0.58rem; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo-row">
+    <div class="logo-box">SQ</div>
+    <div>
+      <div class="logo-text">ScoutIQ</div>
+      <div class="logo-sub">Player Intelligence Platform</div>
+    </div>
+  </div>
+  <div class="header-badge">Árbol de Oportunidades y Soluciones · MVP v1</div>
+</header>
+
+<div class="page">
+
+  <div class="page-title">Árbol de Oportunidades y Soluciones</div>
+  <div class="page-desc">
+    Mapea los dolores validados de los clubes europeos de nivel medio (Tier 2–3) con las features del MVP
+    diseñadas para resolverlos, ancladas a un resultado medible único. Leé de arriba hacia abajo:
+    Objetivo → Oportunidades → Soluciones → Métrica.
+  </div>
+
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:#34d399"></div>Resultado deseado</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#4f8ef7"></div>Oportunidad (Dolor)</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#7c5cfc"></div>Solución (Feature MVP)</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#f59e0b"></div>North Star Metric</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#34d399;opacity:0.4"></div>En el MVP</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#6b7a99;opacity:0.4"></div>Post-MVP</div>
+  </div>
+
+  <div class="tree">
+
+    <!-- OBJETIVO -->
+    <div class="row">
+      <div class="row-label">Objetivo</div>
+      <div class="row-nodes">
+        <div class="node node-goal">
+          <div class="node-label">Resultado Deseado</div>
+          <div class="node-title">Los Directores Deportivos de clubes europeos de nivel medio toman decisiones de fichaje más rápidas y mejor fundamentadas</div>
+          <div class="node-desc">Reducir el gap entre el dato crudo de rendimiento y el insight accionable — de días de análisis manual a una única sesión de evaluación contextualizada.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider-row">
+      <div class="divider-arrow">↓</div>
+      <div class="divider-label">Se descompone en</div>
+      <div class="divider-line"></div>
+    </div>
+
+    <!-- OPORTUNIDADES -->
+    <div class="row">
+      <div class="row-label">Oportunidades</div>
+      <div class="row-nodes">
+
+        <div class="node node-opp">
+          <div class="node-label">Dolor 1</div>
+          <div class="node-title">Fragmentación de fuentes</div>
+          <div class="node-desc">Los clubes trabajan simultáneamente con Wyscout, reportes PDF de scouts y Excel. No hay capa de síntesis — el Director Deportivo debe integrar todo manualmente.</div>
+          <div class="node-tags">
+            <span class="tag tag-blue">Flujo de trabajo</span>
+            <span class="tag tag-blue">Datos</span>
+          </div>
+        </div>
+
+        <div class="node node-opp">
+          <div class="node-label">Dolor 2</div>
+          <div class="node-title">Ausencia de contexto táctico</div>
+          <div class="node-desc">Los datos muestran stats absolutas pero no si el jugador encaja en el sistema del club. Stats sin contexto generan malas decisiones.</div>
+          <div class="node-tags">
+            <span class="tag tag-blue">Insight</span>
+            <span class="tag tag-blue">Táctica</span>
+          </div>
+        </div>
+
+        <div class="node node-opp">
+          <div class="node-label">Dolor 3</div>
+          <div class="node-title">Ciclos de decisión largos</div>
+          <div class="node-desc">Evaluar un candidato toma 2–3 días. Las ventanas de mercado son cortas y competitivas — las decisiones lentas significan fichajes perdidos.</div>
+          <div class="node-tags">
+            <span class="tag tag-blue">Velocidad</span>
+            <span class="tag tag-blue">Eficiencia</span>
+          </div>
+        </div>
+
+        <div class="node node-opp">
+          <div class="node-label">Dolor 4</div>
+          <div class="node-title">Sesgo del scout</div>
+          <div class="node-desc">Las decisiones dependen demasiado de la percepción subjetiva de observadores individuales. Decisiones de millones de euros necesitan más que la opinión de una persona.</div>
+          <div class="node-tags">
+            <span class="tag tag-blue">Objetividad</span>
+            <span class="tag tag-blue">Riesgo</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="divider-row">
+      <div class="divider-arrow">↓</div>
+      <div class="divider-label">Abordado por</div>
+      <div class="divider-line"></div>
+    </div>
+
+    <!-- SOLUCIONES -->
+    <div class="row">
+      <div class="row-label">Soluciones</div>
+      <div class="row-nodes">
+
+        <div class="node node-sol">
+          <span class="mvp-badge mvp-in">✓ MVP</span>
+          <div class="node-label">Aborda D1, D3</div>
+          <div class="node-title">Búsqueda y filtrado de jugadores</div>
+          <div class="node-desc">Búsqueda unificada por posición, liga, edad y métricas. Reemplaza la búsqueda multi-fuente.</div>
+          <div class="node-tags"><span class="tag tag-purple">Feature core</span></div>
+        </div>
+
+        <div class="node node-sol">
+          <span class="mvp-badge mvp-in">✓ MVP</span>
+          <div class="node-label">Aborda D2, D4</div>
+          <div class="node-title">Fit Score Táctico</div>
+          <div class="node-desc">Índice 0–100 que mide cuánto encaja el perfil de un jugador con el sistema táctico del club. Objetivo, configurable y con contexto.</div>
+          <div class="node-tags"><span class="tag tag-purple">Diferenciador</span></div>
+        </div>
+
+        <div class="node node-sol">
+          <span class="mvp-badge mvp-in">✓ MVP</span>
+          <div class="node-label">Aborda D2, D4</div>
+          <div class="node-title">Radar de performance (6 dimensiones)</div>
+          <div class="node-desc">Perfil visual en pressing, juego combinativo, perfil ofensivo y adaptación táctica — en una sola vista.</div>
+          <div class="node-tags"><span class="tag tag-purple">Feature core</span></div>
+        </div>
+
+        <div class="node node-sol">
+          <span class="mvp-badge mvp-in">✓ MVP</span>
+          <div class="node-label">Aborda D1, D2, D3</div>
+          <div class="node-title">Insights automáticos del Fit Score</div>
+          <div class="node-desc">Explicación en lenguaje natural del desglose del Fit Score. Decisión informada en &lt; 5 minutos, sin interpretación manual.</div>
+          <div class="node-tags"><span class="tag tag-purple">Diferenciador</span></div>
+        </div>
+
+        <div class="node node-sol">
+          <span class="mvp-badge mvp-in">✓ MVP</span>
+          <div class="node-label">Aborda D1, D3</div>
+          <div class="node-title">Shortlist personalizada</div>
+          <div class="node-desc">Pipeline persistente por Director Deportivo. La plataforma reemplaza la planilla como única fuente de verdad.</div>
+          <div class="node-tags"><span class="tag tag-purple">Feature core</span></div>
+        </div>
+
+        <div class="node node-sol">
+          <span class="mvp-badge mvp-in">✓ MVP</span>
+          <div class="node-label">Aborda D3</div>
+          <div class="node-title">Alertas de contratos próximos a vencer</div>
+          <div class="node-desc">Muestra oportunidades de mercado antes de que abra la ventana — convierte el scouting reactivo en gestión proactiva del pipeline.</div>
+          <div class="node-tags"><span class="tag tag-purple">Feature core</span></div>
+        </div>
+
+        <div class="node node-sol" style="opacity:0.55;">
+          <span class="mvp-badge mvp-out">V2</span>
+          <div class="node-label">Aborda D1, D2</div>
+          <div class="node-title">Comparación multi-liga normalizada</div>
+          <div class="node-desc">Comparar jugadores entre ligas con estadísticas ajustadas. Requiere data science considerable — diferido a V2.</div>
+          <div class="node-tags"><span class="tag tag-muted">Post-MVP</span></div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="divider-row">
+      <div class="divider-arrow">↓</div>
+      <div class="divider-label">Medido por</div>
+      <div class="divider-line"></div>
+    </div>
+
+    <!-- NORTH STAR -->
+    <div class="row">
+      <div class="row-label" style="color:var(--amber)">Métrica</div>
+      <div class="row-nodes">
+        <div class="node node-ns">
+          <div class="node-label">⭐ North Star Metric</div>
+          <div class="node-title">Tasa de Insight-a-Decisión &gt; 30%</div>
+          <div class="node-desc" style="margin-top:6px; max-width:700px;">
+            <strong style="color:#fbbf24">Objetivo:</strong> más del 30% de los perfiles con Fit Score vistos por el Director Deportivo derivan en una acción activa de shortlist — dentro de la primera ventana de mercado tras el lanzamiento.
+            <br/><br/>
+            Esta métrica es el puente entre "dato consumido" y "decisión tomada". Es el único indicador que valida directamente la hipótesis central: que los insights de la plataforma se traducen en decisiones reales de fichaje, no en engagement pasivo.
+          </div>
+          <div class="node-tags" style="margin-top:14px;">
+            <span class="tag tag-amber">Registrable en la app</span>
+            <span class="tag tag-amber">Valida la hipótesis central</span>
+            <span class="tag tag-amber">Indicador líder del resultado</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /tree -->
+
+  <!-- Métricas resumen -->
+  <div class="metric-section">
+    <div class="metric-section-title">Sección 7 — Métricas de Éxito del MVP</div>
+    <div class="metric-section-desc">Las métricas operacionales se registran en la app desde el primer día. El indicador de resultado se valida mediante entrevistas estructuradas en la semana 2 y semana 4 del Roadmap del Mes 1.</div>
+
+    <div class="metric-grid">
+      <div class="metric-card ns">
+        <div class="m-label">⭐ North Star</div>
+        <div class="m-value">Tasa de Insight-a-Decisión &gt; 30%</div>
+        <div class="m-desc">% de perfiles con Fit Score vistos que derivan en acción de shortlist. Mide directamente si los insights generan decisiones.</div>
+      </div>
+
+      <div class="metric-card">
+        <div class="m-label">Adopción</div>
+        <div class="m-value">DAU / MAU &gt; 40%</div>
+        <div class="m-desc">La plataforma se usa activamente, no solo post-lanzamiento.</div>
+      </div>
+
+      <div class="metric-card">
+        <div class="m-label">Valor percibido</div>
+        <div class="m-value">NPS &gt; 40 en semana 4</div>
+        <div class="m-desc">Indicador temprano de retención y boca a boca.</div>
+      </div>
+
+      <div class="metric-card">
+        <div class="m-label">Eficiencia</div>
+        <div class="m-value">Evaluación &lt; 10 min</div>
+        <div class="m-desc">Vs. benchmark de 2–3 días con proceso manual.</div>
+      </div>
+
+      <div class="metric-card">
+        <div class="m-label">Engagement</div>
+        <div class="m-value">&gt; 5 jugadores en shortlist / usuario</div>
+        <div class="m-desc">El flujo de scouting migró a la plataforma.</div>
+      </div>
+
+      <div class="metric-card">
+        <div class="m-label">Negocio</div>
+        <div class="m-value">1 conversión a pago al mes 3</div>
+        <div class="m-desc">Valida el modelo de monetización B2B SaaS.</div>
+      </div>
+
+      <div class="metric-card" style="border-color:rgba(52,211,153,0.25); background:rgba(52,211,153,0.04);">
+        <div class="m-label" style="color:var(--green)">Resultado (rezagado)</div>
+        <div class="m-value" style="color:var(--green); font-size:0.88rem;">≥ 1 jugador del shortlist avanza a consideración formal de fichaje en la ventana 1</div>
+        <div class="m-desc">Valida la hipótesis central. Registrado mediante entrevistas con el Director Deportivo — no con datos de la app.</div>
+      </div>
+    </div>
+
+  </div>
+
+</div><!-- /page -->
+
+<footer>ScoutIQ · Árbol de Oportunidades y Soluciones · Solo uso interno · 2026</footer>
+
+</body>
+</html>
